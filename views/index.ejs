@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Gestión de Inquilinos</title>
+    <link rel="stylesheet" href="/styles.css">
+
+<style>
+    .open-card {
+        background: #1f2937;
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        width: 250px;
+        text-align: center;
+        cursor: pointer;
+        margin: 50px auto;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: 0.2s;
+    }
+
+    .open-card:hover {
+        transform: scale(1.03);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        position: relative;
+
+        /* 🔥 FIX SCROLL (esto es lo único nuevo) */
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .close {
+        position: absolute;
+        right: 15px;
+        top: 10px;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 6px 0;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        background: #1f2937;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #374151;
+    }
+</style>
+
+
+</head>
+
+<body>
+
+<%- include('partials/navbar') %>
+
+<div class="container">
+
+
+<div class="open-card" onclick="openModal()">
+    ➕ Registrar Inquilino
+</div>
+
+
+</div>
+
+<!-- MODAL -->
+
+<div class="modal" id="modal">
+
+
+<div class="modal-content">
+
+    <span class="close" onclick="closeModal()">✖</span>
+
+    <h2>Registrar Inquilino</h2>
+
+    <form action="/guardar" method="POST">
+
+        <input type="text" name="codigo" placeholder="Código" required>
+        <input type="text" name="nombreCompleto" placeholder="Nombre completo" required>
+        <input type="text" name="dni" placeholder="DNI">
+        <input type="text" name="telefono" placeholder="Teléfono">
+        <input type="email" name="correo" placeholder="Correo">
+
+        <!-- 🔁 RESTAURADO -->
+        <select name="estado">
+            <option value="activo">Activo</option>
+            <option value="moroso">Moroso</option>
+            <option value="retirado">Retirado</option>
+            <option value="suspendido">Suspendido</option>
+            <option value="en evaluacion">En evaluación</option>
+        </select>
+
+        <!-- 🏠 HABITACIÓN -->
+        <label>Habitación disponible</label>
+        <select name="habitacion" required>
+            <option value="">Selecciona habitación</option>
+            <% habitaciones.forEach(h => { %>
+                <option value="<%= h.numero %>"><%= h.numero %></option>
+            <% }) %>
+        </select>
+
+        <!-- 🔁 RESTAURADO -->
+        <input type="date" name="fechaIngreso">
+        <input type="date" name="fechaSalida">
+
+        <select name="tieneGarantia">
+            <option value="1">Tiene garantía</option>
+            <option value="0">No tiene garantía</option>
+        </select>
+
+        <input type="number" name="montoGarantia" placeholder="Monto garantía">
+
+        <textarea name="observaciones" placeholder="Observaciones"></textarea>
+
+        <button type="submit">Guardar Inquilino</button>
+
+    </form>
+
+</div>
+
+
+</div>
+
+<script>
+function openModal() {
+    document.getElementById('modal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+}
+
+window.onclick = function(e) {
+    let modal = document.getElementById('modal');
+    if (e.target === modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+
+</body>
+</html>

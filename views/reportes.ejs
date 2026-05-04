@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Reportes</title>
+    <link rel="stylesheet" href="/styles.css">
+
+
+<style>
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+        margin-top: 40px;
+    }
+
+    .card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    img {
+        width: 80px;
+        margin-bottom: 15px;
+    }
+</style>
+
+
+</head>
+
+<body>
+
+<%- include('partials/navbar') %>
+
+<div class="container">
+
+
+<h1>📊 Reportes</h1>
+
+<div class="grid">
+
+    <!-- 🧾 REPORTE INQUILINOS -->
+    <div class="card" onclick="location.href='/reportes/inquilinos'">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+        <h2>Reporte de Inquilinos</h2>
+        <p>Listado completo y detallado</p>
+    </div>
+
+    <!-- 💰 REPORTE PAGOS -->
+    <div class="card" onclick="location.href='/reportes/pagos'">
+        <img src="https://cdn-icons-png.flaticon.com/512/2331/2331941.png">
+        <h2>Reporte de Pagos</h2>
+        <p>Resumen financiero mensual</p>
+    </div>
+
+</div>
+
+
+</div>
+
+</body>
+</html>

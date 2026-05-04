@@ -1,0 +1,55 @@
+<%- include('partials/navbar') %>
+
+<div class="container">
+
+<h1>➕ Registrar Inquilino</h1>
+
+<form action="/guardar" method="POST">
+
+    <!-- CÓDIGO -->
+    <input type="text" name="codigo" placeholder="Código del inquilino" required>
+
+    <!-- NOMBRE -->
+    <input type="text" name="nombreCompleto" placeholder="Nombre completo" required>
+
+    <!-- DNI -->
+    <input type="text" name="dni" placeholder="DNI" required>
+
+    <!-- TELÉFONO -->
+    <input type="text" name="telefono" placeholder="Teléfono" required>
+
+    <!-- CORREO -->
+    <input type="email" name="correo" placeholder="Correo electrónico">
+
+    <!-- ESTADO -->
+    <select name="estado" required>
+        <option value="activo">Activo</option>
+        <option value="moroso">Moroso</option>
+        <option value="retirado">Retirado</option>
+        <option value="suspendido">Suspendido</option>
+        <option value="en evaluacion">En evaluación</option>
+    </select>
+
+    <!-- FECHAS -->
+    <label>Fecha de ingreso</label>
+    <input type="date" name="fechaIngreso">
+
+    <label>Fecha de salida</label>
+    <input type="date" name="fechaSalida">
+
+    <!-- GARANTÍA -->
+    <select name="tieneGarantia">
+        <option value="1">Tiene garantía</option>
+        <option value="0">No tiene garantía</option>
+    </select>
+
+    <input type="number" name="montoGarantia" placeholder="Monto de garantía">
+
+    <!-- OBSERVACIONES -->
+    <textarea name="observaciones" placeholder="Observaciones"></textarea>
+
+    <button type="submit">Guardar Inquilino</button>
+
+</form>
+
+</div>

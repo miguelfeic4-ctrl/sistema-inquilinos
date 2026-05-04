@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Reporte Pagos</title>
+    <link rel="stylesheet" href="/styles.css">
+
+<style>
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    table {
+        width: 100%;
+        margin-top: 30px;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        text-align: center;
+    }
+</style>
+
+
+</head>
+
+<body>
+
+<%- include('partials/navbar') %>
+
+<div class="container">
+
+
+<h1>💰 Reporte de Pagos</h1>
+
+<div class="cards">
+    <div class="card">
+        <h3>Total esperado</h3>
+        <h2>S/ <%= total %></h2>
+    </div>
+
+    <div class="card">
+        <h3>Pagado</h3>
+        <h2 style="color:green;">S/ <%= pagado %></h2>
+    </div>
+
+    <div class="card">
+        <h3>Pendiente</h3>
+        <h2 style="color:red;">S/ <%= pendiente %></h2>
+    </div>
+</div>
+
+<table>
+    <tr>
+        <th>Inquilino</th>
+        <th>Precio</th>
+        <th>Pagado</th>
+        <th>Estado</th>
+    </tr>
+
+    <% detalle.forEach(i => { %>
+        <tr>
+            <td><%= i.nombre %></td>
+            <td>S/ <%= i.precio %></td>
+            <td>S/ <%= i.pago %></td>
+            <td>
+                <%= i.estado === 'Pagado' ? '✔ Pagado' : '❌ Pendiente' %>
+            </td>
+        </tr>
+    <% }) %>
+
+</table>
+
+<div style="margin-top:30px;text-align:center;">
+    <a href="/reportes/pagos/excel">
+        <button class="btn" style="background:#16a34a;">
+            📥 Generar Excel
+        </button>
+    </a>
+</div>
+</div>
+
+</body>
+</html>

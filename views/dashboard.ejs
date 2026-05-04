@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Financiero</title>
+    <link rel="stylesheet" href="/styles.css">
+
+    <style>
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .card {
+            padding: 15px;
+            border-radius: 10px;
+            background: #f4f4f4;
+            text-align: center;
+        }
+
+        .pagado { border-left: 6px solid green; }
+        .pendiente { border-left: 6px solid red; }
+        .parcial { border-left: 6px solid orange; }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            text-decoration: none;
+            background: black;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .filtros button {
+            margin: 5px;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<%- include('partials/navbar') %>
+
+<div class="container">
+
+    <h1>📊 Dashboard Financiero - <%= mes %>/<%= anio %></h1>
+
+    <!-- RESUMEN -->
+    <div class="grid">
+
+        <div class="card">
+            <h2>Total</h2>
+            <h1><%= total %></h1>
+        </div>
+
+        <div class="card" style="border-left: 6px solid green;">
+            <h2>Pagados</h2>
+            <h1><%= pagados %></h1>
+        </div>
+
+        <div class="card" style="border-left: 6px solid red;">
+            <h2>Pendientes</h2>
+            <h1><%= pendientes %></h1>
+        </div>
+
+        <div class="card" style="border-left: 6px solid orange;">
+            <h2>Parciales</h2>
+            <h1><%= parciales %></h1>
+        </div>
+
+    </div>
+
+    <!-- LISTA -->
+    <h2 style="margin-top:30px;">📋 Estado de Inquilinos</h2>
+
+    <table>
+        <tr>
+            <th>Nombre</th>
+            <th>Habitación</th>
+            <th>Estado</th>
+            <th>Monto</th>
+        </tr>
+
+        <% data.forEach(i => { %>
+            <tr class="<%= i.estado %>">
+                <td><%= i.nombre %></td>
+                <td><%= i.habitacion %></td>
+                <td><%= i.estado %></td>
+                <td>S/ <%= i.monto %></td>
+            </tr>
+        <% }) %>
+
+    </table>
+
+</div>
+
+</body>
+</html>

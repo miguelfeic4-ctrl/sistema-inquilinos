@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Reporte Inquilinos</title>
+    <link rel="stylesheet" href="/styles.css">
+
+
+<style>
+    table {
+        width: 100%;
+        margin-top: 25px;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: center;
+    }
+</style>
+
+
+</head>
+
+<body>
+
+<%- include('partials/navbar') %>
+
+<div class="container">
+
+
+<h1>📋 Reporte de Inquilinos</h1>
+
+<table>
+    <tr>
+        <th>Nombre</th>
+        <th>DNI</th>
+        <th>Teléfono</th>
+        <th>Correo</th>
+        <th>Habitación</th>
+        <th>Ingreso</th>
+        <th>Garantía</th>
+        <th>Precio</th>
+    </tr>
+
+    <% data.forEach(i => { %>
+        <tr>
+            <td><%= i.nombreCompleto %></td>
+            <td><%= i.dni %></td>
+            <td><%= i.telefono %></td>
+            <td><%= i.correo %></td>
+            <td><%= i.habitacion %></td>
+            <td>
+                <%= i.fechaIngreso 
+                    ? new Date(i.fechaIngreso).toLocaleDateString() 
+                    : '-' %>
+            </td>
+            <td>S/ <%= i.montoGarantia %></td>
+            <td>S/ <%= i.precio %></td>
+        </tr>
+    <% }) %>
+
+</table>
+
+<div style="margin-top:30px;text-align:center;">
+    <a href="/reportes/inquilinos/excel">
+        <button class="btn" style="background:#16a34a;">
+            📥 Generar Excel
+        </button>
+    </a>
+</div>
+
+</div>
+
+</body>
+</html>

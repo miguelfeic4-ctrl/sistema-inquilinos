@@ -1,0 +1,123 @@
+<%- include('partials/navbar') %>
+<link rel="stylesheet" href="/styles.css">
+<div class="container">
+
+<h1>🏢 Dashboard de Habitaciones</h1>
+
+<!-- 📊 RESUMEN -->
+<div style="
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+">
+
+    <div class="card">
+        <h3>🏠 Total Habitaciones</h3>
+        <h2><%= total %></h2>
+    </div>
+
+    <div class="card" style="border-left:5px solid #22c55e;">
+        <h3>🟢 Libres</h3>
+        <h2><%= libres %></h2>
+    </div>
+
+    <div class="card" style="border-left:5px solid #ef4444;">
+        <h3>🔴 Ocupadas</h3>
+        <h2><%= ocupadas %></h2>
+    </div>
+
+</div>
+
+<!-- 📌 LISTA -->
+<h2 style="margin-top:30px;">📋 Estado de Habitaciones</h2>
+
+<div style="
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+">
+
+    <% data.forEach(h => { %>
+
+        <div class="card" style="
+            text-align:center;
+            padding:15px;
+            border-radius:12px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position:relative;
+        ">
+
+            <!-- 🏷 Estado badge -->
+            <div style="
+                position:absolute;
+                top:8px;
+                right:8px;
+                padding:4px 8px;
+                font-size:11px;
+                border-radius:999px;
+                color:white;
+                background: <%= h.estado === 'ocupada' ? '#ef4444' : '#22c55e' %>;
+            ">
+                <%= h.estado %>
+            </div>
+
+            <!-- 🏠 Número -->
+            <h2 style="margin:10px 0;"><%= h.numero %></h2>
+
+            <!-- 👤 Inquilino -->
+            <% if (h.inquilino) { %>
+                <p style="font-size:13px;color:#6b7280;">
+                    👤 <%= h.inquilino %>
+                </p>
+
+                <!-- 💰 PRECIO -->
+                <form action="/habitaciones/precio" method="POST" style="margin-top:8px;">
+
+                    <input type="hidden" name="habitacion" value="<%= h.numero %>">
+
+                    <input 
+                        type="number" 
+                        name="precio" 
+                        value="<%= h.precio || 0 %>" 
+                        placeholder="Precio"
+                        style="
+                            width:80%;
+                            padding:6px;
+                            border:1px solid #ddd;
+                            border-radius:6px;
+                            font-size:12px;
+                            text-align:center;
+                        "
+                    >
+
+                    <button type="submit" style="
+                        margin-top:6px;
+                        padding:5px 8px;
+                        font-size:12px;
+                        border:none;
+                        border-radius:6px;
+                        background:#1f2937;
+                        color:white;
+                        cursor:pointer;
+                    ">
+                        💾 Guardar
+                    </button>
+
+                </form>
+
+            <% } else { %>
+                <p style="font-size:13px;color:#9ca3af;">
+                    Disponible
+                </p>
+            <% } %>
+
+        </div>
+
+    <% }) %>
+
+</div>
+
+</div>

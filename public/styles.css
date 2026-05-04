@@ -1,0 +1,290 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    color: #1f2937;
+}
+
+/* =========================
+   🔵 NAVBAR (UNIFICADO)
+========================= */
+.navbar {
+    width: 100%;
+    background: #1f2937;
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    margin-left: 15px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.navbar a:hover {
+    background: #374151;
+}
+
+/* =========================
+   📦 CONTENEDOR
+========================= */
+.container {
+    padding: 25px;
+}
+
+/* =========================
+   🟦 TITULOS
+========================= */
+h1, h2 {
+    color: #1f2937;
+    margin-bottom: 15px;
+}
+
+/* =========================
+   🟩 FORMULARIOS
+========================= */
+form {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #38bdf8;
+}
+
+/* =========================
+   🔘 BOTÓN
+========================= */
+button {
+    width: 100%;
+    padding: 10px;
+    background: #1f2937;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #374151;
+}
+
+/* =========================
+   🟨 CARDS
+========================= */
+.card {
+    background: white;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* =========================
+   📊 TABLAS
+========================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th {
+    background: #1f2937;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+    background: #f3f4f6;
+}
+
+/* =========================
+   🟢 ESTADOS
+========================= */
+.estado-activo { background: #e6ffe6; }
+.estado-moroso { background: #ffe6e6; }
+.estado-retirado { background: #f0f0f0; }
+.estado-suspendido { background: #fff3cd; }
+.estado-en\ evaluacion { background: #e6f0ff; }
+
+/* =========================
+   🏷 BADGES
+========================= */
+.badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: white;
+}
+
+.badge.activo { background: #2ecc71; }
+.badge.moroso { background: #e74c3c; }
+.badge.retirado { background: #95a5a6; }
+.badge.suspendido { background: #f39c12; }
+.badge.en\ evaluacion { background: #3498db; }
+
+/* =========================
+   🔘 ACCIONES
+========================= */
+.acciones a {
+    margin-right: 10px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.edit { color: #2980b9; }
+.delete { color: #e74c3c; }
+
+/* =========================
+   📱 RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    form {
+        width: 100%;
+    }
+}
+
+/* =========================
+   🧾 MODAL CORREGIDO
+========================= */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 92%;
+    max-width: 520px;
+
+    max-height: 85vh;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    font-weight: bold;
+}
+
+.modal-body {
+    padding: 15px;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+.close {
+    cursor: pointer;
+    float: right;
+    font-size: 18px;
+}
+/* =========================
+   🧠 MODAL PRO (LAYOUT)
+========================= */
+
+.modal-content {
+    background: white;
+    border-radius: 14px;
+    width: 95%;
+    max-width: 850px;
+    max-height: 90vh;
+
+    display: flex;
+    overflow: hidden;
+}
+
+/* izquierda: formulario */
+.modal-body {
+    flex: 2;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* derecha: barra lateral */
+.modal-sidebar {
+    flex: 1;
+    background: #f3f4f6;
+    padding: 20px;
+    border-left: 1px solid #e5e7eb;
+}
+
+/* secciones del form */
+.form-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+}
+
+/* títulos de sección */
+.form-section h3 {
+    margin-top: 0;
+    font-size: 14px;
+    color: #374151;
+}
+
+/* botones sidebar */
+.sidebar-link {
+    display: block;
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background: white;
+    text-decoration: none;
+    color: #1f2937;
+    font-size: 13px;
+}
+
+.sidebar-link:hover {
+    background: #e5e7eb;
+}

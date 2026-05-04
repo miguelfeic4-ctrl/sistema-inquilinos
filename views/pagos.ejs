@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pagos</title>
+    <link rel="stylesheet" href="/styles.css">
+
+<style>
+    .dashboard {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .card {
+        padding: 20px;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        text-align: center;
+    }
+
+    .circle-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+    }
+
+    .circle {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    table {
+        margin-top: 25px;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: center;
+    }
+
+    .btn {
+        padding: 6px 10px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .btn-pagar {
+        background: #22c55e;
+        color: white;
+    }
+
+    .moroso {
+        background: #ffe6e6;
+    }
+</style>
+
+</head>
+
+<body>
+
+<%- include('partials/navbar') %>
+
+<div class="container">
+
+<h1>💰 Dashboard de Pagos</h1>
+
+<!-- 🔽 FILTRO -->
+<form method="GET" id="filtroForm">
+
+    <select name="mes" onchange="this.form.submit()">
+        <% const meses = [
+            "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+            "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+        ]; %>
+    
+        <% meses.forEach((m, i) => { %>
+            <option value="<%= i + 1 %>" <%= Number(mes) === (i + 1) ? 'selected' : '' %>>
+                <%= m %>
+            </option>
+        <% }) %>
+    </select>
+
+    <input type="number" name="anio" value="<%= anio %>">
+
+</form>
+
+<script>
+document.getElementById('mes').addEventListener('change', () => {
+    document.getElementById('filtroForm').submit();
+});
+</script>
+
+<!-- 🔵 PROGRESO -->
+<div class="circle-container">
+    <div class="circle"
+        style="background: conic-gradient(#22c55e <%= total > 0 ? (pagado / total) * 360 : 0 %>deg,#e5e7eb 0deg);">
+
+        <div style="
+            background:white;
+            border-radius:50%;
+            width:140px;
+            height:140px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-direction:column;
+        ">
+            <span>Pagado</span>
+            <strong>S/ <%= pagado %></strong>
+        </div>
+
+    </div>
+</div>
+
+<!-- 📊 RESUMEN -->
+<div class="dashboard">
+    <div class="card">
+        <h3>Total esperado</h3>
+        <h2>S/ <%= total %></h2>
+    </div>
+
+    <div class="card">
+        <h3>Pagado</h3>
+        <h2 style="color:green;">S/ <%= pagado %></h2>
+    </div>
+
+    <div class="card">
+        <h3>Pendiente</h3>
+        <h2 style="color:red;">S/ <%= pendiente %></h2>
+    </div>
+</div>
+
+<!-- 📋 TABLA -->
+<h2 style="margin-top:30px;">📋 Detalle por Inquilino</h2>
+
+<table>
+    <tr>
+        <th>Nombre</th>
+        <th>Habitación</th>
+        <th>Precio</th>
+        <th>Pagado</th>
+        <th>Día pago</th>
+        <th>Estado</th>
+        <th>Acción</th>
+    </tr>
+
+    <% data.forEach(i => { 
+        const restante = Math.max(0, i.precio - i.pago);
+    %>
+
+    <tr class="<%= i.estadoPago === 'moroso' ? 'moroso' : '' %>">
+
+        <td><%= i.nombreCompleto %></td>
+        <td><%= i.habitacion %></td>
+        <td>S/ <%= i.precio %></td>
+        <td>S/ <%= i.pago %></td>
+
+        <td>
+            <%= i.fechaIngreso ? new Date(i.fechaIngreso).getDate() : '-' %>
+        </td>
+
+        <td>
+            <% if (i.estadoPago === 'pagado') { %>
+                <span style="color:green;font-weight:bold;">Pagado</span>
+            <% } else if (i.estadoPago === 'parcial') { %>
+                <span style="color:orange;font-weight:bold;">Parcial</span>
+            <% } else if (i.estadoPago === 'moroso') { %>
+                <span style="color:red;font-weight:bold;">Moroso</span>
+            <% } else { %>
+                <span style="color:red;">Pendiente</span>
+            <% } %>
+        </td>
+
+        <td>
+            <% if (i.estadoPago !== 'pagado' && restante > 0) { %>
+
+                <form action="/pagos/registrar" method="POST">
+                    <input type="hidden" name="inquilinoId" value="<%= i.id %>">
+                    <input type="hidden" name="mes" value="<%= mes %>">
+                    <input type="hidden" name="anio" value="<%= anio %>">
+                    <input type="hidden" name="monto" value="<%= restante %>">
+
+                    <button class="btn btn-pagar">
+                        Pagar S/ <%= restante %>
+                    </button>
+                </form>
+
+            <% } else { %>
+                ✔
+            <% } %>
+        </td>
+
+    </tr>
+
+    <% }) %>
+
+</table>
+
+</div>
+
+<script>
+document.getElementById('mesSelect').addEventListener('change', function () {
+    document.getElementById('formFiltro').submit();
+});
+</script>
+
+</body>
+</html>
