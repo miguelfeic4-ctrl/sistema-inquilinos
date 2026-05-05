@@ -24,18 +24,23 @@ app.use(session({
 // =====================
 // 🔥 SQL
 // =====================
+const sql = require('mssql');
+
 const config = {
-    user: 'sa',
-    password: 'perrogato',
-    server: 'DESKTOP-D6MPGQ7',
-    database: 'InquilinosDB',
-    port: 1433,
-    options: { trustServerCertificate: true }
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  server: process.env.DB_SERVER,
+  database: process.env.DB_NAME,
+  options: {
+    encrypt: true,
+    trustServerCertificate: false
+  }
 };
 
+// 🔥 CONEXIÓN GLOBAL
 sql.connect(config)
-    .then(() => console.log('✅ SQL conectado'))
-    .catch(err => console.log('❌ SQL error:', err.message));
+  .then(() => console.log('✅ Conectado a Azure SQL'))
+  .catch(err => console.log('❌ Error conexión:', err));
 
 // =====================
 // 🧠 FUNCIONES
