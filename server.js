@@ -377,13 +377,13 @@ app.get('/editar/:id', auth, async (req, res) => {
             return res.send('Inquilino no encontrado');
         }
 
-        res.render('editar_inquilino', {
-            inquilino: result.recordset[0]
-        });
+        res.render('editar', {
+    inquilino: result.recordset[0]
+});
 
     } catch (err) {
-        console.log(err);
-        res.send('Error al cargar edición');
+        console.log("🔥 ERROR EDITAR:", err);
+        res.send(err.message || 'Error al cargar edición');
     }
 });
 
