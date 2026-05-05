@@ -91,12 +91,6 @@ function auth(req, res, next) {
 // =====================
 app.get('/login', (req, res) => res.render('login'));
 
-
-
-
-
-
-
 async function connectDB() {
   try {
     pool = await sql.connect(config);
@@ -369,6 +363,64 @@ app.get('/pagos', auth, async (req, res) => {
         anio
     });
 });
+
+app.get('/editar/:id', auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const result = await sql.query`
+            SELECT * FROM Inquilinos
+            WHERE id = ${id}
+        `;
+
+        if (result.recordset.length === 0) {
+            return res.send('Inquilino no encontrado');
+        }
+
+        res.render('editar_inquilino', {
+            inquilino: result.recordset[0]
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.send('Error al cargar edición');
+    }
+});
+
+app.post('/editar/:id', auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const {
+            nombreCompleto,
+            dni,
+            telefono,
+            correo,
+            estado,
+            habitacion
+        } = req.body;
+
+        await sql.query`
+            UPDATE Inquilinos
+            SET 
+                nombreCompleto = ${nombreCompleto},
+                dni = ${dni},
+                telefono = ${telefono},
+                correo = ${correo},
+                estado = ${estado},
+                habitacion = ${habitacion}
+            WHERE id = ${id}
+        `;
+
+        res.redirect('/inquilinos');
+
+    } catch (err) {
+        console.log(err);
+        res.send('Error al actualizar');
+    }
+});
+
+
 
 // =====================
 // 💾 REGISTRAR PAGO
