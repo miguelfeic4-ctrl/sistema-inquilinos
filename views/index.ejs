@@ -6,35 +6,38 @@
 
     <style>
         body {
-            background: #0f172a;
+            background: #0b1220;
             font-family: Arial, sans-serif;
             color: white;
+            margin: 0;
         }
 
         .container {
             display: flex;
             justify-content: center;
+            align-items: center;
             padding-top: 40px;
         }
 
         /* 🔥 CARD BOTÓN */
         .open-card {
-            background: linear-gradient(135deg, #1f2937, #111827);
+            background: linear-gradient(135deg, #111827, #1f2937);
             color: white;
             padding: 25px;
-            border-radius: 16px;
+            border-radius: 18px;
             width: 260px;
             text-align: center;
             cursor: pointer;
             margin: 50px auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            transition: all 0.25s ease;
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 25px rgba(56,189,248,0.15);
+            transition: 0.3s;
+            border: 1px solid rgba(56,189,248,0.2);
         }
 
         .open-card:hover {
-            transform: translateY(-5px) scale(1.03);
-            background: linear-gradient(135deg, #2563eb, #1f2937);
+            transform: translateY(-6px);
+            box-shadow: 0 0 35px rgba(56,189,248,0.35);
+            background: linear-gradient(135deg, #1f2937, #2563eb);
         }
 
         /* 🔥 MODAL */
@@ -48,36 +51,39 @@
             background: rgba(0,0,0,0.75);
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(6px);
         }
 
         .modal-content {
-            background: #111827;
-            padding: 25px;
-            border-radius: 16px;
+            background: #0b1220;
+            padding: 30px;
+            border-radius: 18px;
             width: 95%;
             max-width: 520px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 0 40px rgba(56,189,248,0.12);
             position: relative;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(56,189,248,0.25);
 
             max-height: 90vh;
             overflow-y: auto;
-        }
 
-        .modal-content h2 {
-            margin-bottom: 15px;
+            /* 🔥 CENTRADO REAL DEL FORM */
             text-align: center;
         }
 
-        /* ❌ CERRAR */
+        /* 🖼️ HEADER ICONO */
+        .modal-content h2 {
+            margin-bottom: 10px;
+            color: #38bdf8;
+        }
+
         .close {
             position: absolute;
             right: 15px;
             top: 10px;
             cursor: pointer;
             font-size: 22px;
-            color: #aaa;
+            color: #94a3b8;
             transition: 0.2s;
         }
 
@@ -85,50 +91,56 @@
             color: white;
         }
 
-        /* 🔥 INPUTS */
+        /* 🔥 INPUTS NEON */
         input, select, textarea {
             width: 100%;
             padding: 12px;
             margin: 8px 0;
-            border: none;
             border-radius: 10px;
-            background: #1f2937;
+            background: #111827;
             color: white;
+            border: 1px solid rgba(56,189,248,0.25);
             outline: none;
             transition: 0.2s;
+            box-sizing: border-box;
         }
 
         input:focus, select:focus, textarea:focus {
-            background: #273449;
-            border: 1px solid #3b82f6;
+            border: 1px solid #38bdf8;
+            box-shadow: 0 0 12px rgba(56,189,248,0.35);
+            transform: scale(1.01);
         }
 
         textarea {
             resize: none;
         }
 
+        label {
+            font-size: 13px;
+            color: #94a3b8;
+            display: block;
+            text-align: left;
+            margin-top: 8px;
+        }
+
         /* 🔘 BOTÓN */
         button {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
             color: white;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
-            transition: 0.2s;
-            margin-top: 10px;
+            transition: 0.3s;
+            margin-top: 12px;
+            box-shadow: 0 0 15px rgba(56,189,248,0.25);
         }
 
         button:hover {
             transform: translateY(-2px);
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
-        }
-
-        label {
-            font-size: 13px;
-            color: #cbd5e1;
+            box-shadow: 0 0 25px rgba(56,189,248,0.5);
         }
     </style>
 </head>
@@ -149,6 +161,13 @@
 <div class="modal" id="modal">
 
     <div class="modal-content">
+
+        <!-- 🖼️ ICONO -->
+        <div style="margin-bottom:10px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/1946/1946429.png"
+                 width="60"
+                 style="filter: drop-shadow(0 0 8px #38bdf8);" />
+        </div>
 
         <span class="close" onclick="closeModal()">✖</span>
 
