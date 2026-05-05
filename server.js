@@ -469,12 +469,11 @@ app.post('/actualizar', async (req, res) => {
 // =====================
 // 💾 REGISTRAR PAGO
 // =====================
-app.post('/Pas/registrar', async (req, res) => {
+app.post('/pagos/registrar', async (req, res) => {
     try {
 
         const { inquilinoId, mes, anio, monto } = req.body;
 
-        // 🔥 VALIDACIÓN BÁSICA
         if (!inquilinoId || !mes || !anio || !monto) {
             return res.send('Datos incompletos');
         }
@@ -490,7 +489,7 @@ app.post('/Pas/registrar', async (req, res) => {
             await sql.query`
                 UPDATE Pas
                 SET monto = monto + ${Number(monto)},
-                    fechaPaa = GETDATE()
+                    fechaPa = GETDATE()
                 WHERE inquilinoId=${inquilinoId}
                 AND mes=${mes}
                 AND anio=${anio}
@@ -502,7 +501,7 @@ app.post('/Pas/registrar', async (req, res) => {
             `;
         }
 
-        res.redirect(`/Pas?mes=${mes}&anio=${anio}`);
+        res.redirect(`/pagos?mes=${mes}&anio=${anio}`);
 
     } catch (err) {
         console.log(err);
