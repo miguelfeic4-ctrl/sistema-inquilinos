@@ -364,21 +364,26 @@ app.get('/pagos', auth, async (req, res) => {
     });
 });
 
-app.get('/editar/:id', auth, async (req, res) => {
+app.get('/editar/:id', async (req, res) => {
     try {
+
         const { id } = req.params;
 
-        const result = await sql.query`
-            SELECT * FROM Inquilinos
-            WHERE id = ${id}
+        const inquilino = await sql.query`
+            SELECT * FROM Inquilinos WHERE id = ${id}
         `;
 
-        if (result.recordset.length === 0) {
-            return res.send('Inquilino no encontrado');
-        }
+        const habitaciones = generarHabitaciones();
 
         res.render('editar', {
-    inquilino: result.recordset[0]
+            inquilino: inquilino.recordset[0],
+            habitaciones: habitaciones
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.send('Error al cargar edición');
+    }
 });
 
     } catch (err) {
