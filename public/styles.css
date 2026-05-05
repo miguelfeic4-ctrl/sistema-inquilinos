@@ -1,18 +1,18 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #f4f6f9;
-    color: #1f2937;
+    background: #0b1220;
+    color: #e5e7eb;
 }
 
 /* =========================
-   🔵 NAVBAR (UNIFICADO)
+   🔵 NAVBAR PRO
 ========================= */
 .navbar {
     width: 100%;
-    background: #1f2937;
+    background: #0f172a;
     color: white;
-    padding: 12px 20px;
+    padding: 14px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -21,21 +21,23 @@ body {
     top: 0;
     z-index: 1000;
 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 0 20px rgba(56,189,248,0.15);
+    border-bottom: 1px solid rgba(56,189,248,0.2);
 }
 
 .navbar a {
-    color: white;
+    color: #e5e7eb;
     text-decoration: none;
     margin-left: 15px;
     font-weight: 500;
     padding: 6px 10px;
-    border-radius: 6px;
+    border-radius: 8px;
     transition: 0.2s;
 }
 
 .navbar a:hover {
-    background: #374151;
+    background: rgba(56,189,248,0.15);
+    box-shadow: 0 0 10px rgba(56,189,248,0.2);
 }
 
 /* =========================
@@ -49,102 +51,115 @@ body {
    🟦 TITULOS
 ========================= */
 h1, h2 {
-    color: #1f2937;
+    color: #38bdf8;
     margin-bottom: 15px;
 }
 
 /* =========================
-   🟩 FORMULARIOS
+   🧾 FORMULARIOS PRO
 ========================= */
 form {
-    background: white;
+    background: #111827;
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 14px;
     width: 100%;
-    max-width: 400px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    max-width: 420px;
+    box-shadow: 0 0 25px rgba(56,189,248,0.08);
+    border: 1px solid rgba(56,189,248,0.15);
 }
 
 input, select, textarea {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     margin: 8px 0;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    border-radius: 10px;
+    background: #0f172a;
+    color: white;
+    border: 1px solid rgba(56,189,248,0.2);
     outline: none;
+    transition: 0.2s;
+    box-sizing: border-box;
 }
 
 input:focus, select:focus, textarea:focus {
     border-color: #38bdf8;
+    box-shadow: 0 0 12px rgba(56,189,248,0.3);
+    transform: scale(1.01);
 }
 
 /* =========================
-   🔘 BOTÓN
+   🔘 BOTÓN PRO
 ========================= */
 button {
     width: 100%;
-    padding: 10px;
-    background: #1f2937;
+    padding: 12px;
+    background: linear-gradient(135deg, #38bdf8, #2563eb);
     color: white;
     border: none;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 10px;
     font-weight: bold;
+    transition: 0.3s;
+    box-shadow: 0 0 15px rgba(56,189,248,0.2);
 }
 
 button:hover {
-    background: #374151;
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(56,189,248,0.4);
 }
 
 /* =========================
-   🟨 CARDS
+   🟨 CARDS PRO
 ========================= */
 .card {
-    background: white;
+    background: #111827;
     padding: 15px;
     margin: 15px 0;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 14px;
+    box-shadow: 0 0 20px rgba(56,189,248,0.08);
+    border: 1px solid rgba(56,189,248,0.15);
 }
 
 /* =========================
-   📊 TABLAS
+   📊 TABLAS PRO
 ========================= */
 table {
     width: 100%;
     border-collapse: collapse;
-    background: white;
-    border-radius: 10px;
+    background: #111827;
+    border-radius: 12px;
     overflow: hidden;
+    box-shadow: 0 0 20px rgba(56,189,248,0.08);
 }
 
 th {
-    background: #1f2937;
-    color: white;
+    background: #0f172a;
+    color: #38bdf8;
     padding: 12px;
     text-align: left;
+    border-bottom: 1px solid rgba(56,189,248,0.2);
 }
 
 td {
     padding: 10px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
 tr:hover {
-    background: #f3f4f6;
+    background: rgba(56,189,248,0.08);
 }
 
 /* =========================
    🟢 ESTADOS
 ========================= */
-.estado-activo { background: #e6ffe6; }
-.estado-moroso { background: #ffe6e6; }
-.estado-retirado { background: #f0f0f0; }
-.estado-suspendido { background: #fff3cd; }
-.estado-en\ evaluacion { background: #e6f0ff; }
+.estado-activo { background: rgba(46, 204, 113, 0.15); }
+.estado-moroso { background: rgba(231, 76, 60, 0.15); }
+.estado-retirado { background: rgba(149, 165, 166, 0.15); }
+.estado-suspendido { background: rgba(243, 156, 18, 0.15); }
+.estado-en\ evaluacion { background: rgba(52, 152, 219, 0.15); }
 
 /* =========================
-   🏷 BADGES
+   🏷 BADGES PRO
 ========================= */
 .badge {
     padding: 4px 10px;
@@ -168,8 +183,33 @@ tr:hover {
     font-weight: bold;
 }
 
-.edit { color: #2980b9; }
-.delete { color: #e74c3c; }
+.edit { color: #38bdf8; }
+.delete { color: #ef4444; }
+
+/* =========================
+   🧾 MODAL PRO
+========================= */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(6px);
+}
+
+.modal-content {
+    background: #0f172a;
+    border-radius: 16px;
+    width: 95%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 40px rgba(56,189,248,0.15);
+    border: 1px solid rgba(56,189,248,0.2);
+}
 
 /* =========================
    📱 RESPONSIVE
@@ -182,109 +222,4 @@ tr:hover {
     form {
         width: 100%;
     }
-}
-
-/* =========================
-   🧾 MODAL CORREGIDO
-========================= */
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 12px;
-    width: 92%;
-    max-width: 520px;
-
-    max-height: 85vh;
-    overflow: hidden;
-
-    display: flex;
-    flex-direction: column;
-}
-
-.modal-header {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    font-weight: bold;
-}
-
-.modal-body {
-    padding: 15px;
-    overflow-y: auto;
-    max-height: 70vh;
-}
-
-.close {
-    cursor: pointer;
-    float: right;
-    font-size: 18px;
-}
-/* =========================
-   🧠 MODAL PRO (LAYOUT)
-========================= */
-
-.modal-content {
-    background: white;
-    border-radius: 14px;
-    width: 95%;
-    max-width: 850px;
-    max-height: 90vh;
-
-    display: flex;
-    overflow: hidden;
-}
-
-/* izquierda: formulario */
-.modal-body {
-    flex: 2;
-    padding: 20px;
-    overflow-y: auto;
-}
-
-/* derecha: barra lateral */
-.modal-sidebar {
-    flex: 1;
-    background: #f3f4f6;
-    padding: 20px;
-    border-left: 1px solid #e5e7eb;
-}
-
-/* secciones del form */
-.form-section {
-    margin-bottom: 20px;
-    padding: 15px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
-}
-
-/* títulos de sección */
-.form-section h3 {
-    margin-top: 0;
-    font-size: 14px;
-    color: #374151;
-}
-
-/* botones sidebar */
-.sidebar-link {
-    display: block;
-    padding: 8px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    background: white;
-    text-decoration: none;
-    color: #1f2937;
-    font-size: 13px;
-}
-
-.sidebar-link:hover {
-    background: #e5e7eb;
 }
