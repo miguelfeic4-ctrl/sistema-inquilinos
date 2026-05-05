@@ -314,9 +314,9 @@ app.post('/habitaciones/precio', async (req, res) => {
 });
 
 // =====================
-// 💰 PAGOS
+// 💰 Pas
 // =====================
-app.get('/pagos', auth, async (req, res) => {
+app.get('/Pas', auth, async (req, res) => {
 
     const mes = new Date().getMonth() + 1;
     const anio = new Date().getFullYear();
@@ -327,7 +327,7 @@ app.get('/pagos', auth, async (req, res) => {
         WHERE estado != 'retirado'
     `;
 
-    const pagos = await sql.query`
+    const Pas = await sql.query`
         SELECT * FROM Pas
         WHERE mes=${mes} AND anio=${anio}
     `;
@@ -337,9 +337,9 @@ app.get('/pagos', auth, async (req, res) => {
 
     const data = inquilinos.recordset.map(i => {
 
-        const pagosDel = pagos.recordset.filter(p => p.inquilinoId === i.id);
+        const PasDel = Pas.recordset.filter(p => p.inquilinoId === i.id);
 
-        const monto = pagosDel.reduce((s, p) => s + Number(p.monto || 0), 0);
+        const monto = PasDel.reduce((s, p) => s + Number(p.monto || 0), 0);
         const precio = Number(i.precio || 0);
 
         total += precio;
@@ -354,7 +354,7 @@ app.get('/pagos', auth, async (req, res) => {
         return { ...i, precio, pago: monto, estadoPago: estado };
     });
 
-    res.render('pagos', {
+    res.render('Pas', {
         data,
         total,
         pagado,
@@ -469,7 +469,7 @@ app.post('/actualizar', async (req, res) => {
 // =====================
 // 💾 REGISTRAR PAGO
 // =====================
-app.post('/pagos/registrar', async (req, res) => {
+app.post('/Pas/registrar', async (req, res) => {
     try {
 
         const { inquilinoId, mes, anio, monto } = req.body;
@@ -488,7 +488,7 @@ app.post('/pagos/registrar', async (req, res) => {
 
         if (existe.recordset.length > 0) {
             await sql.query`
-                UPDATE Pagos
+                UPDATE Pas
                 SET monto = monto + ${Number(monto)},
                     fechaPaa = GETDATE()
                 WHERE inquilinoId=${inquilinoId}
@@ -497,12 +497,12 @@ app.post('/pagos/registrar', async (req, res) => {
             `;
         } else {
             await sql.query`
-                INSERT INTO Pagos (inquilinoId, mes, anio, monto, fechaPa)
+                INSERT INTO Pas (inquilinoId, mes, anio, monto, fechaPa)
                 VALUES (${inquilinoId}, ${mes}, ${anio}, ${Number(monto)}, GETDATE())
             `;
         }
 
-        res.redirect(`/pagos?mes=${mes}&anio=${anio}`);
+        res.redirect(`/Pas?mes=${mes}&anio=${anio}`);
 
     } catch (err) {
         console.log(err);
@@ -531,9 +531,9 @@ app.get('/reportes/inquilinos', async (req, res) => {
     }
 });
 // =====================
-// 📊 REPORTE PAGOS
+// 📊 REPORTE Pas
 // =====================
-app.get('/reportes/pagos', async (req, res) => {
+app.get('/reportes/Pas', async (req, res) => {
     try {
 
         const inquilinos = await sql.query`
@@ -541,7 +541,7 @@ app.get('/reportes/pagos', async (req, res) => {
             FROM Inquilinos
         `;
 
-        const pagos = await sql.query`
+        const Pas = await sql.query`
             SELECT * FROM Pas
         `;
 
@@ -550,7 +550,7 @@ app.get('/reportes/pagos', async (req, res) => {
 
         const detalle = inquilinos.recordset.map(i => {
 
-            const monto = pagos.recordset
+            const monto = Pas.recordset
                 .filter(p => p.inquilinoId === i.id)
                 .reduce((s, p) => s + Number(p.monto || 0), 0);
 
@@ -565,7 +565,7 @@ app.get('/reportes/pagos', async (req, res) => {
             };
         });
 
-        res.render('reporte_pagos', {
+        res.render('reporte_Pas', {
             total,
             pagado,
             pendiente: total - pagado,
@@ -573,8 +573,8 @@ app.get('/reportes/pagos', async (req, res) => {
         });
 
     } catch (err) {
-        console.log('🔥 ERROR REPORTE PAGOS:', err);
-        res.send('Error reporte pagos');
+        console.log('🔥 ERROR REPORTE Pas:', err);
+        res.send('Error reporte Pas');
     }
 });
 // =====================
