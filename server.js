@@ -381,12 +381,6 @@ app.get('/editar/:id', async (req, res) => {
         });
 
     } catch (err) {
-        console.log(err);
-        res.send('Error al cargar edición');
-    }
-});
-
-    } catch (err) {
         console.log("🔥 ERROR EDITAR:", err);
         res.send(err.message || 'Error al cargar edición');
     }
