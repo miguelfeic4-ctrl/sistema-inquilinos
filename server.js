@@ -419,6 +419,51 @@ app.post('/editar/:id', auth, async (req, res) => {
     }
 });
 
+app.post('/actualizar', async (req, res) => {
+    try {
+
+        const {
+            id,
+            codigo,
+            nombreCompleto,
+            dni,
+            telefono,
+            correo,
+            estado,
+            fechaIngreso,
+            fechaSalida,
+            tieneGarantia,
+            montoGarantia,
+            observaciones,
+            habitacion
+        } = req.body;
+
+        await sql.query`
+            UPDATE Inquilinos
+            SET
+                codi = ${codigo || ''},
+                nombreCompleto = ${nombreCompleto || ''},
+                dni = ${dni || ''},
+                telefono = ${telefono || ''},
+                correo = ${correo || ''},
+                estado = ${estado || 'activo'},
+                fechaIngreso = ${fechaIngreso ? new Date(fechaIngreso) : null},
+                fechaSalida = ${fechaSalida ? new Date(fechaSalida) : null},
+                tieneGarantia = ${Number(tieneGarantia) || 0},
+                montoGarantia = ${Number(montoGarantia) || 0},
+                observaciones = ${observaciones || ''},
+                habitacion = ${habitacion || null}
+            WHERE id = ${id}
+        `;
+
+        res.redirect('/inquilinos');
+
+    } catch (err) {
+        console.log("🔥 ERROR ACTUALIZAR:", err);
+        res.send('Error al actualizar');
+    }
+});
+
 
 
 // =====================
