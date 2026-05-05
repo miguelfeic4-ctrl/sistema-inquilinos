@@ -328,7 +328,7 @@ app.get('/pagos', auth, async (req, res) => {
     `;
 
     const pagos = await sql.query`
-        SELECT * FROM Pagos
+        SELECT * FROM Pas
         WHERE mes=${mes} AND anio=${anio}
     `;
 
@@ -480,7 +480,7 @@ app.post('/pagos/registrar', async (req, res) => {
         }
 
         const existe = await sql.query`
-            SELECT * FROM Pagos
+            SELECT * FROM Pas
             WHERE inquilinoId=${inquilinoId}
             AND mes=${mes}
             AND anio=${anio}
@@ -490,14 +490,14 @@ app.post('/pagos/registrar', async (req, res) => {
             await sql.query`
                 UPDATE Pagos
                 SET monto = monto + ${Number(monto)},
-                    fechaPago = GETDATE()
+                    fechaPaa = GETDATE()
                 WHERE inquilinoId=${inquilinoId}
                 AND mes=${mes}
                 AND anio=${anio}
             `;
         } else {
             await sql.query`
-                INSERT INTO Pagos (inquilinoId, mes, anio, monto, fechaPago)
+                INSERT INTO Pagos (inquilinoId, mes, anio, monto, fechaPa)
                 VALUES (${inquilinoId}, ${mes}, ${anio}, ${Number(monto)}, GETDATE())
             `;
         }
@@ -542,7 +542,7 @@ app.get('/reportes/pagos', async (req, res) => {
         `;
 
         const pagos = await sql.query`
-            SELECT * FROM Pagos
+            SELECT * FROM Pas
         `;
 
         let total = 0;
