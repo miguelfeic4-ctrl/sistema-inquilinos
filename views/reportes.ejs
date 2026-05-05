@@ -5,35 +5,87 @@
     <title>Reportes</title>
     <link rel="stylesheet" href="/styles.css">
 
-
 <style>
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 25px;
-        margin-top: 40px;
+    body {
+        background: #0f172a;
+        color: white;
     }
 
-    .card {
-        background: white;
+    .container {
         padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+        color: #38bdf8;
+        margin-bottom: 10px;
+    }
+
+    p.subtitle {
+        color: #94a3b8;
+        margin-bottom: 25px;
+    }
+
+    /* =========================
+       📊 GRID REPORTES
+    ========================= */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+    }
+
+    /* =========================
+       🧾 CARDS MODERNAS
+    ========================= */
+    .card {
+        background: #111827;
+        padding: 25px;
+        border-radius: 16px;
+        border: 1px solid rgba(56,189,248,0.12);
+        box-shadow: 0 0 20px rgba(56,189,248,0.06);
         text-align: center;
         cursor: pointer;
-        transition: 0.2s;
+        transition: all 0.25s ease;
+        position: relative;
+        overflow: hidden;
     }
 
     .card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 0 30px rgba(56,189,248,0.18);
+        border: 1px solid rgba(56,189,248,0.25);
     }
 
-    img {
-        width: 80px;
+    .card img {
+        width: 70px;
         margin-bottom: 15px;
+        filter: drop-shadow(0 0 8px rgba(56,189,248,0.25));
     }
-</style>
 
+    .card h2 {
+        color: #38bdf8;
+        margin-bottom: 8px;
+    }
+
+    .card p {
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    /* efecto glow sutil */
+    .card::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(56,189,248,0.08), transparent 60%);
+        transform: rotate(25deg);
+    }
+
+</style>
 
 </head>
 
@@ -43,27 +95,32 @@
 
 <div class="container">
 
-
 <h1>📊 Reportes</h1>
+<p class="subtitle">Selecciona el módulo que deseas analizar</p>
 
 <div class="grid">
 
     <!-- 🧾 REPORTE INQUILINOS -->
     <div class="card" onclick="location.href='/reportes/inquilinos'">
+
         <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-        <h2>Reporte de Inquilinos</h2>
-        <p>Listado completo y detallado</p>
+
+        <h2>Inquilinos</h2>
+        <p>Listado completo, estado, habitaciones y datos personales</p>
+
     </div>
 
     <!-- 💰 REPORTE PAGOS -->
     <div class="card" onclick="location.href='/reportes/pagos'">
+
         <img src="https://cdn-icons-png.flaticon.com/512/2331/2331941.png">
-        <h2>Reporte de Pagos</h2>
-        <p>Resumen financiero mensual</p>
+
+        <h2>Pagos</h2>
+        <p>Resumen financiero mensual, morosidad y control de ingresos</p>
+
     </div>
 
 </div>
-
 
 </div>
 

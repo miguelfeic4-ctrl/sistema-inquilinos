@@ -1,28 +1,175 @@
 <%- include('partials/navbar') %>
 <link rel="stylesheet" href="/styles.css">
+
+<style>
+    body {
+        background: #0f172a;
+        color: white;
+    }
+
+    .container {
+        padding: 25px;
+    }
+
+    h1, h2 {
+        color: #38bdf8;
+    }
+
+    /* =========================
+       📊 RESUMEN CARDS
+    ========================= */
+    .grid-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .card {
+        background: #111827;
+        padding: 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(56,189,248,0.12);
+        box-shadow: 0 0 20px rgba(56,189,248,0.06);
+        text-align: center;
+        transition: 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 25px rgba(56,189,248,0.15);
+    }
+
+    .card h2 {
+        margin: 5px 0 0;
+        color: #38bdf8;
+    }
+
+    .card h3 {
+        font-size: 13px;
+        color: #cbd5e1;
+        margin: 0;
+    }
+
+    /* =========================
+       🏠 GRID HABITACIONES
+    ========================= */
+    .grid-rooms {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .room-card {
+        background: #111827;
+        border-radius: 14px;
+        padding: 15px;
+        text-align: center;
+        position: relative;
+        border: 1px solid rgba(56,189,248,0.12);
+        box-shadow: 0 0 15px rgba(56,189,248,0.05);
+        transition: 0.2s;
+    }
+
+    .room-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 25px rgba(56,189,248,0.15);
+    }
+
+    /* =========================
+       🏷 BADGE ESTADO
+    ========================= */
+    .badge-status {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        padding: 4px 10px;
+        font-size: 11px;
+        border-radius: 999px;
+        color: white;
+        text-transform: capitalize;
+    }
+
+    .ocupada {
+        background: #ef4444;
+    }
+
+    .libre {
+        background: #22c55e;
+    }
+
+    /* =========================
+       👤 INFO
+    ========================= */
+    .tenant {
+        font-size: 13px;
+        color: #cbd5e1;
+        margin-top: 5px;
+    }
+
+    .available {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 5px;
+    }
+
+    /* =========================
+       💰 FORM PRECIO
+    ========================= */
+    input {
+        width: 80%;
+        padding: 7px;
+        margin-top: 8px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: #1f2937;
+        color: white;
+        text-align: center;
+        outline: none;
+    }
+
+    input:focus {
+        border: 1px solid #38bdf8;
+        box-shadow: 0 0 10px rgba(56,189,248,0.2);
+    }
+
+    button {
+        margin-top: 6px;
+        padding: 6px 10px;
+        font-size: 12px;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #38bdf8, #2563eb);
+        color: white;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 12px rgba(56,189,248,0.25);
+    }
+</style>
+
 <div class="container">
 
 <h1>🏢 Dashboard de Habitaciones</h1>
 
 <!-- 📊 RESUMEN -->
-<div style="
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-top: 20px;
-">
+<div class="grid-summary">
 
     <div class="card">
         <h3>🏠 Total Habitaciones</h3>
         <h2><%= total %></h2>
     </div>
 
-    <div class="card" style="border-left:5px solid #22c55e;">
+    <div class="card">
         <h3>🟢 Libres</h3>
         <h2><%= libres %></h2>
     </div>
 
-    <div class="card" style="border-left:5px solid #ef4444;">
+    <div class="card">
         <h3>🔴 Ocupadas</h3>
         <h2><%= ocupadas %></h2>
     </div>
@@ -32,49 +179,29 @@
 <!-- 📌 LISTA -->
 <h2 style="margin-top:30px;">📋 Estado de Habitaciones</h2>
 
-<div style="
-    display:grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-">
+<div class="grid-rooms">
 
     <% data.forEach(h => { %>
 
-        <div class="card" style="
-            text-align:center;
-            padding:15px;
-            border-radius:12px;
-            background: white;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            position:relative;
-        ">
+        <div class="room-card">
 
-            <!-- 🏷 Estado badge -->
-            <div style="
-                position:absolute;
-                top:8px;
-                right:8px;
-                padding:4px 8px;
-                font-size:11px;
-                border-radius:999px;
-                color:white;
-                background: <%= h.estado === 'ocupada' ? '#ef4444' : '#22c55e' %>;
-            ">
+            <!-- BADGE -->
+            <div class="badge-status <%= h.estado %>">
                 <%= h.estado %>
             </div>
 
-            <!-- 🏠 Número -->
-            <h2 style="margin:10px 0;"><%= h.numero %></h2>
+            <!-- NÚMERO -->
+            <h2><%= h.numero %></h2>
 
-            <!-- 👤 Inquilino -->
+            <!-- INQUILINO -->
             <% if (h.inquilino) { %>
-                <p style="font-size:13px;color:#6b7280;">
-                    👤 <%= h.inquilino %>
-                </p>
 
-                <!-- 💰 PRECIO -->
-                <form action="/habitaciones/precio" method="POST" style="margin-top:8px;">
+                <div class="tenant">
+                    👤 <%= h.inquilino %>
+                </div>
+
+                <!-- FORM PRECIO -->
+                <form action="/habitaciones/precio" method="POST">
 
                     <input type="hidden" name="habitacion" value="<%= h.numero %>">
 
@@ -83,35 +210,20 @@
                         name="precio" 
                         value="<%= h.precio || 0 %>" 
                         placeholder="Precio"
-                        style="
-                            width:80%;
-                            padding:6px;
-                            border:1px solid #ddd;
-                            border-radius:6px;
-                            font-size:12px;
-                            text-align:center;
-                        "
                     >
 
-                    <button type="submit" style="
-                        margin-top:6px;
-                        padding:5px 8px;
-                        font-size:12px;
-                        border:none;
-                        border-radius:6px;
-                        background:#1f2937;
-                        color:white;
-                        cursor:pointer;
-                    ">
+                    <button type="submit">
                         💾 Guardar
                     </button>
 
                 </form>
 
             <% } else { %>
-                <p style="font-size:13px;color:#9ca3af;">
+
+                <div class="available">
                     Disponible
-                </p>
+                </div>
+
             <% } %>
 
         </div>

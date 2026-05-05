@@ -2,63 +2,142 @@
 
 <link rel="stylesheet" href="/styles.css">
 
-<div style="max-width:900px;margin:auto;padding:20px;">
+<style>
+    body {
+        background: #0f172a;
+        color: white;
+    }
 
-<div style="background:white;padding:20px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+    .container-edit {
+        max-width: 900px;
+        margin: auto;
+        padding: 25px;
+    }
+
+    .card-edit {
+        background: #111827;
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 0 25px rgba(56,189,248,0.08);
+        border: 1px solid rgba(56,189,248,0.15);
+    }
+
+    h1 {
+        color: #38bdf8;
+        margin-bottom: 20px;
+    }
+
+    /* GRID FORM */
+    .grid-form {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: #1f2937;
+        color: white;
+        outline: none;
+        transition: 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        border: 1px solid #38bdf8;
+        box-shadow: 0 0 10px rgba(56,189,248,0.2);
+    }
+
+    textarea {
+        margin-top: 15px;
+        resize: none;
+        min-height: 100px;
+    }
+
+    /* BOTÓN */
+    button {
+        margin-top: 15px;
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #38bdf8, #2563eb);
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(56,189,248,0.25);
+    }
+
+    /* LABEL VISUAL */
+    label {
+        font-size: 12px;
+        color: #94a3b8;
+    }
+</style>
+
+<div class="container-edit">
+
+<div class="card-edit">
 
 <h1>✏️ Editar Inquilino</h1>
 
 <form action="/actualizar" method="POST">
 
+    <input type="hidden" name="id" value="<%= inquilino.id %>">
 
-<input type="hidden" name="id" value="<%= inquilino.id %>">
+    <div class="grid-form">
 
-<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+        <input name="codigo" value="<%= inquilino.codigo %>" placeholder="Código">
+        <input name="nombreCompleto" value="<%= inquilino.nombreCompleto %>" placeholder="Nombre">
 
-    <input name="codigo" value="<%= inquilino.codigo %>" placeholder="Código">
-    <input name="nombreCompleto" value="<%= inquilino.nombreCompleto %>" placeholder="Nombre">
+        <input name="dni" value="<%= inquilino.dni %>" placeholder="DNI">
+        <input name="telefono" value="<%= inquilino.telefono %>" placeholder="Teléfono">
 
-    <input name="dni" value="<%= inquilino.dni %>" placeholder="DNI">
-    <input name="telefono" value="<%= inquilino.telefono %>" placeholder="Teléfono">
+        <input name="correo" value="<%= inquilino.correo %>" placeholder="Correo">
 
-    <input name="correo" value="<%= inquilino.correo %>" placeholder="Correo">
+        <!-- HABITACIÓN -->
+        <select name="habitacion">
+            <option value="<%= inquilino.habitacion %>">
+                Actual: <%= inquilino.habitacion %>
+            </option>
 
-    <!-- 🏠 HABITACIÓN -->
-    <select name="habitacion">
-        <option value="<%= inquilino.habitacion %>">
-            Actual: <%= inquilino.habitacion %>
-        </option>
+            <% habitaciones.forEach(h => { %>
+                <% if (h.numero !== inquilino.habitacion) { %>
+                    <option value="<%= h.numero %>">
+                        <%= h.numero %>
+                    </option>
+                <% } %>
+            <% }) %>
+        </select>
 
-        <% habitaciones.forEach(h => { %>
-            <% if (h.numero !== inquilino.habitacion) { %>
-                <option value="<%= h.numero %>">
-                    <%= h.numero %>
-                </option>
-            <% } %>
-        <% }) %>
-    </select>
+        <!-- FECHA -->
+        <input type="date"
+            name="fechaIngreso"
+            value="<%= inquilino.fechaIngreso ? inquilino.fechaIngreso.toISOString().split('T')[0] : '' %>">
 
-    <!-- 📅 SOLO FECHA INGRESO -->
-    <input type="date"
-        name="fechaIngreso"
-        value="<%= inquilino.fechaIngreso ? inquilino.fechaIngreso.toISOString().split('T')[0] : '' %>">
+        <select name="tieneGarantia">
+            <option value="1" <%= inquilino.tieneGarantia==1?'selected':'' %>>Sí garantía</option>
+            <option value="0" <%= inquilino.tieneGarantia==0?'selected':'' %>>Sin garantía</option>
+        </select>
 
-    <select name="tieneGarantia">
-        <option value="1" <%= inquilino.tieneGarantia==1?'selected':'' %>>Sí garantía</option>
-        <option value="0" <%= inquilino.tieneGarantia==0?'selected':'' %>>Sin garantía</option>
-    </select>
+        <input name="montoGarantia" value="<%= inquilino.montoGarantia %>" placeholder="Garantía">
 
-    <input name="montoGarantia" value="<%= inquilino.montoGarantia %>" placeholder="Garantía">
+    </div>
 
-</div>
+    <textarea name="observaciones">
+        <%= inquilino.observaciones %>
+    </textarea>
 
-<textarea name="observaciones" style="width:100%;margin-top:10px;">
-    <%= inquilino.observaciones %>
-</textarea>
-
-<button type="submit" style="margin-top:10px;padding:10px;width:100%;background:#1f2937;color:white;border:none;border-radius:8px;">
-    Actualizar
-</button>
+    <button type="submit">
+        Actualizar Inquilino
+    </button>
 
 </form>
 

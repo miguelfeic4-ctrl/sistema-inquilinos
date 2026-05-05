@@ -5,63 +5,105 @@
     <link rel="stylesheet" href="/styles.css">
 
     <style>
+        /* =========================
+           📊 GRID RESUMEN PRO
+        ========================= */
         .grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .card {
-            padding: 15px;
-            border-radius: 10px;
-            background: #f4f4f4;
+            padding: 18px;
+            border-radius: 14px;
+            background: #111827;
             text-align: center;
+            border: 1px solid rgba(56,189,248,0.15);
+            box-shadow: 0 0 20px rgba(56,189,248,0.08);
+            transition: 0.2s;
         }
 
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(56,189,248,0.15);
+        }
+
+        .card h1 {
+            color: #38bdf8;
+            margin: 5px 0 0 0;
+        }
+
+        .card h2 {
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        /* =========================
+           📊 TABLA PRO
+        ========================= */
         table {
             width: 100%;
             margin-top: 20px;
             border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
+            background: #111827;
+            border-radius: 12px;
             overflow: hidden;
-        }
-
-        th, td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
+            box-shadow: 0 0 20px rgba(56,189,248,0.08);
+            border: 1px solid rgba(56,189,248,0.15);
         }
 
         th {
-            background: #1f2937;
-            color: white;
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: #e5e7eb;
+            font-size: 13px;
         }
 
         tr:hover {
-            background: #f3f4f6;
+            background: rgba(56,189,248,0.08);
         }
 
+        /* =========================
+           🔘 BOTONES PRO
+        ========================= */
         .btn {
-            padding: 5px 10px;
+            padding: 6px 10px;
             text-decoration: none;
-            background: black;
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
             color: white;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 12px;
+            transition: 0.2s;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 12px rgba(56,189,248,0.3);
         }
 
         .acciones a {
-            margin-right: 8px;
+            margin-right: 6px;
         }
 
-        /* estados visuales */
-        .activo { border-left: 5px solid green; }
-        .moroso { border-left: 5px solid red; }
-        .suspendido { border-left: 5px solid orange; }
-        .retirado { border-left: 5px solid gray; }
-        .en\ evaluacion { border-left: 5px solid blue; }
-
+        /* =========================
+           🟢 ESTADOS NEON SOFT
+        ========================= */
+        .activo { border-left: 4px solid #2ecc71; }
+        .moroso { border-left: 4px solid #ef4444; }
+        .suspendido { border-left: 4px solid #f59e0b; }
+        .retirado { border-left: 4px solid #6b7280; }
+        .en\ evaluacion { border-left: 4px solid #38bdf8; }
     </style>
 </head>
 
@@ -117,13 +159,16 @@
                 <td><%= i.telefono || '-' %></td>
                 <td><%= i.correo || '-' %></td>
 
-                <td><%= i.estado %></td>
+                <td>
+                    <span class="badge <%= i.estado %>">
+                        <%= i.estado %>
+                    </span>
+                </td>
 
                 <td>
                     <%= i.fechaIngreso ? i.fechaIngreso.toString().slice(0,10) : '-' %>
                 </td>
 
-                <!-- 🔥 HABITACIÓN NUEVA -->
                 <td><%= i.habitacion || '-' %></td>
 
                 <td class="acciones">
