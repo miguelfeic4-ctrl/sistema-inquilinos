@@ -536,7 +536,7 @@ app.get('/reportes', auth, (req, res) => {
 // =====================
 // 📊 REPORTE Pas
 // =====================
-app.get('/reportes/Pas', async (req, res) => {
+app.get('/reportes/pagos', auth, async (req, res) => {
     try {
 
         const inquilinos = await sql.query`
@@ -544,7 +544,7 @@ app.get('/reportes/Pas', async (req, res) => {
             FROM Inquilinos
         `;
 
-        const Pas = await sql.query`
+        const pagos = await sql.query`
             SELECT * FROM Pas
         `;
 
@@ -553,7 +553,7 @@ app.get('/reportes/Pas', async (req, res) => {
 
         const detalle = inquilinos.recordset.map(i => {
 
-            const monto = Pas.recordset
+            const monto = pagos.recordset
                 .filter(p => p.inquilinoId === i.id)
                 .reduce((s, p) => s + Number(p.monto || 0), 0);
 
@@ -568,7 +568,7 @@ app.get('/reportes/Pas', async (req, res) => {
             };
         });
 
-        res.render('reporte_Pas', {
+        res.render('reporte_pagos', {
             total,
             pagado,
             pendiente: total - pagado,
@@ -576,8 +576,8 @@ app.get('/reportes/Pas', async (req, res) => {
         });
 
     } catch (err) {
-        console.log('🔥 ERROR REPORTE Pas:', err);
-        res.send('Error reporte Pas');
+        console.log('ERROR PAGOS:', err);
+        res.send('Error reporte pagos');
     }
 });
 // =====================
