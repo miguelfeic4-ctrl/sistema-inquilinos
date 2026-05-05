@@ -91,14 +91,41 @@ function auth(req, res, next) {
 // =====================
 app.get('/login', (req, res) => res.render('login'));
 
+
+
+
+
+const config = {
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  server: process.env.DB_SERVER,
+  database: process.env.DB_NAME,
+  options: {
+    encrypt: true,
+    trustServerCertificate: false
+  }
+};
+
+let pool;
+
+async function connectDB() {
+  try {
+    pool = await sql.connect(config);
+    console.log("✅ Conectado a Azure SQL");
+  } catch (err) {
+    console.log("❌ Error conexión:", err);
+  }
+}
+
+connectDB();
 app.post('/login', async (req, res) => {
     try {
         const { usuario, password } = req.body;
 
-        const result = await pool.request().query(`
+        const result = await sql.query`
             SELECT * FROM Usuarios
-            WHERE usuario='${usuario}' AND password='${password}'
-        `);
+            WHERE usuario = ${usuario} AND password = ${password}
+        `;
 
         if (result.recordset.length > 0) {
             req.session.usuario = usuario;
