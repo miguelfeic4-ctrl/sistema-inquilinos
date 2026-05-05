@@ -32,23 +32,6 @@
         border: 1px solid rgba(56,189,248,0.12);
         box-shadow: 0 0 20px rgba(56,189,248,0.06);
         text-align: center;
-        transition: 0.2s;
-    }
-
-    .card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 0 25px rgba(56,189,248,0.15);
-    }
-
-    .card h2 {
-        margin: 5px 0 0;
-        color: #38bdf8;
-    }
-
-    .card h3 {
-        font-size: 13px;
-        color: #cbd5e1;
-        margin: 0;
     }
 
     /* =========================
@@ -62,23 +45,44 @@
     }
 
     .room-card {
-        background: #111827;
         border-radius: 14px;
-        padding: 15px;
+        padding: 14px;
         text-align: center;
         position: relative;
-        border: 1px solid rgba(56,189,248,0.12);
-        box-shadow: 0 0 15px rgba(56,189,248,0.05);
         transition: 0.2s;
+
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        min-height: 170px;
+        overflow: hidden;
     }
 
     .room-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 0 25px rgba(56,189,248,0.15);
     }
 
     /* =========================
-       🏷 BADGE ESTADO
+       🟢 OCUPADA (BUENA)
+    ========================= */
+    .room-card.ocupada {
+        background: #22c55e;
+        color: #0f172a;
+        border: 2px solid #16a34a;
+    }
+
+    /* =========================
+       🔴 LIBRE (ALERTA)
+    ========================= */
+    .room-card.libre {
+        background: #ef4444;
+        color: white;
+        border: 2px solid #b91c1c;
+    }
+
+    /* =========================
+       🏷 BADGE
     ========================= */
     .badge-status {
         position: absolute;
@@ -89,66 +93,59 @@
         border-radius: 999px;
         color: white;
         text-transform: capitalize;
-    }
-
-    .ocupada {
-        background: #ef4444;
-    }
-
-    .libre {
-        background: #22c55e;
+        background: rgba(0,0,0,0.25);
     }
 
     /* =========================
        👤 INFO
     ========================= */
-    .tenant {
+    .tenant, .available {
         font-size: 13px;
-        color: #cbd5e1;
-        margin-top: 5px;
-    }
-
-    .available {
-        font-size: 13px;
-        color: #64748b;
-        margin-top: 5px;
+        font-weight: 500;
     }
 
     /* =========================
-       💰 FORM PRECIO
+       💰 FORM PRECIO FIX
     ========================= */
-    input {
-        width: 80%;
-        padding: 7px;
-        margin-top: 8px;
-        border-radius: 8px;
-        border: 1px solid rgba(255,255,255,0.08);
-        background: #1f2937;
-        color: white;
-        text-align: center;
-        outline: none;
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        margin-top: auto;
+        width: 100%;
     }
 
-    input:focus {
-        border: 1px solid #38bdf8;
-        box-shadow: 0 0 10px rgba(56,189,248,0.2);
+    input {
+        width: 100%;
+        max-width: 120px;
+        padding: 6px;
+        border-radius: 8px;
+        border: none;
+        text-align: center;
+        outline: none;
+        font-size: 12px;
     }
 
     button {
-        margin-top: 6px;
-        padding: 6px 10px;
+        width: 100%;
+        max-width: 120px;
+        padding: 6px;
         font-size: 12px;
         border: none;
         border-radius: 8px;
-        background: linear-gradient(135deg, #38bdf8, #2563eb);
-        color: white;
         cursor: pointer;
-        transition: 0.2s;
+        font-weight: bold;
     }
 
-    button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0 12px rgba(56,189,248,0.25);
+    .room-card.ocupada button {
+        background: #0f172a;
+        color: white;
+    }
+
+    .room-card.libre button {
+        background: #111827;
+        color: white;
     }
 </style>
 
@@ -183,24 +180,20 @@
 
     <% data.forEach(h => { %>
 
-        <div class="room-card">
+        <div class="room-card <%= h.estado %>">
 
-            <!-- BADGE -->
-            <div class="badge-status <%= h.estado %>">
+            <div class="badge-status">
                 <%= h.estado %>
             </div>
 
-            <!-- NÚMERO -->
             <h2><%= h.numero %></h2>
 
-            <!-- INQUILINO -->
             <% if (h.inquilino) { %>
 
                 <div class="tenant">
                     👤 <%= h.inquilino %>
                 </div>
 
-                <!-- FORM PRECIO -->
                 <form action="/habitaciones/precio" method="POST">
 
                     <input type="hidden" name="habitacion" value="<%= h.numero %>">
