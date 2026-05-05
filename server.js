@@ -529,6 +529,10 @@ app.get('/reportes/inquilinos', async (req, res) => {
         res.send('Error reporte inquilinos');
     }
 });
+
+app.get('/reportes', (req, res) => {
+    res.redirect('/reportes/inquilinos');
+});
 // =====================
 // 📊 REPORTE Pas
 // =====================
