@@ -36,11 +36,18 @@ const config = {
   }
 };
 
-// 🔥 CONEXIÓN GLOBAL
-sql.connect(config)
-  .then(() => console.log('✅ Conectado a Azure SQL'))
-  .catch(err => console.log('❌ Error conexión:', err));
+let pool;
 
+async function connectDB() {
+  try {
+    pool = await sql.connect(config);
+    console.log("✅ Conectado a Azure SQL");
+  } catch (err) {
+    console.log("❌ Error conexión:", err);
+  }
+}
+
+connectDB();
 // =====================
 // 🧠 FUNCIONES
 // =====================
@@ -88,10 +95,10 @@ app.post('/login', async (req, res) => {
     try {
         const { usuario, password } = req.body;
 
-        const result = await sql.query`
+        const result = await pool.request().query(`
             SELECT * FROM Usuarios
-            WHERE usuario=${usuario} AND password=${password}
-        `;
+            WHERE usuario='${usuario}' AND password='${password}'
+        `);
 
         if (result.recordset.length > 0) {
             req.session.usuario = usuario;
