@@ -318,8 +318,8 @@ app.post('/habitaciones/precio', async (req, res) => {
 // =====================
 app.get('/pagos', auth, async (req, res) => {
 
-    const mes = new Date().getMonth() + 1;
-    const anio = new Date().getFullYear();
+   const mes = parseInt(req.query.mes) || new Date().getMonth() + 1;
+const anio = parseInt(req.query.anio) || new Date().getFullYear();
 
     const inquilinos = await sql.query`
         SELECT id, nombreCompleto, habitacion, precio, fechaIngreso
