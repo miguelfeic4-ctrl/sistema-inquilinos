@@ -316,7 +316,7 @@ app.post('/habitaciones/precio', async (req, res) => {
 // =====================
 // 💰 Pas
 // =====================
-app.get('/Pas', auth, async (req, res) => {
+app.get('/pagos', auth, async (req, res) => {
 
     const mes = new Date().getMonth() + 1;
     const anio = new Date().getFullYear();
@@ -354,7 +354,7 @@ app.get('/Pas', auth, async (req, res) => {
         return { ...i, precio, pago: monto, estadoPago: estado };
     });
 
-    res.render('Pas', {
+    res.render('pagos', {
         data,
         total,
         pagado,
