@@ -259,30 +259,38 @@ app.post('/guardar', async (req, res) => {
             habitacion
         } = req.body;
 
-        await sql.query`
-            INSERT INTO Inquilinos
-            (
-                codigo, nombreCompleto, dni, telefono, correo,
-                estado, fechaIngreso, fechaSalida,
-                tieneGarantia, montoGarantia,
-                observaciones, habitacion
-            )
-            VALUES
-            (
-                ${codigo || ''},
-                ${nombreCompleto || ''},
-                ${dni || ''},
-                ${telefono || ''},
-                ${correo || ''},
-                ${estado || 'activo'},
-                ${fechaIngreso ? new Date(fechaIngreso) : null},
-                ${fechaSalida ? new Date(fechaSalida) : null},
-                ${Number(tieneGarantia) || 0},
-                ${Number(montoGarantia) || 0},
-                ${observaciones || ''},
-                ${habitacion || null}
-            )
-        `;
+        await pool.request().query`
+INSERT INTO Inquilinos
+(
+    codi,
+    nombreCompleto,
+    dni,
+    telefono,
+    correo,
+    estado,
+    fechaIngreso,
+    fechaSalida,
+    tieneGarantia,
+    montoGarantia,
+    observaciones,
+    habitacion
+)
+VALUES
+(
+    ${codigo || ''},
+    ${nombreCompleto || ''},
+    ${dni || ''},
+    ${telefono || ''},
+    ${correo || ''},
+    ${estado || 'activo'},
+    ${fechaIngreso ? new Date(fechaIngreso) : null},
+    ${fechaSalida ? new Date(fechaSalida) : null},
+    ${Number(tieneGarantia) || 0},
+    ${Number(montoGarantia) || 0},
+    ${observaciones || ''},
+    ${habitacion || null}
+)
+`;
 
         res.redirect('/inquilinos');
 
