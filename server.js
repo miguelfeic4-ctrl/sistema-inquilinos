@@ -615,7 +615,45 @@ app.get('/reportes/inquilinos/excel', auth, async (req, res) => {
     await workbook.xlsx.write(res);
     res.end();
 });
+app.get('/reportes/pagos/excel', auth, async (req, res) => {
 
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Pagos');
+
+    sheet.columns = [
+        { header: 'ID Inquilino', key: 'inquilinoId', width: 15 },
+        { header: 'Mes', key: 'mes', width: 10 },
+        { header: 'Año', key: 'anio', width: 10 },
+        { header: 'Monto', key: 'monto', width: 12 },
+        { header: 'Fecha Pago', key: 'fechaPa', width: 20 }
+    ];
+
+    const result = await sql.query`
+        SELECT * FROM Pas
+    `;
+
+    result.recordset.forEach(p => {
+        sheet.addRow({
+            ...p,
+            fechaPa: p.fechaPa ? new Date(p.fechaPa) : null
+        });
+    });
+
+    sheet.getColumn('fechaPa').numFmt = 'dd/mm/yyyy';
+
+    res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+
+    res.setHeader(
+        'Content-Disposition',
+        'attachment; filename=pagos.xlsx'
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+});
 // =====================
 // 🚀 SERVER
 // =====================
