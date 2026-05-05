@@ -530,8 +530,8 @@ app.get('/reportes/inquilinos', async (req, res) => {
     }
 });
 
-app.get('/reportes', (req, res) => {
-    res.redirect('/reportes/inquilinos');
+app.get('/reportes', auth, (req, res) => {
+    res.render('reportes');
 });
 // =====================
 // 📊 REPORTE Pas
