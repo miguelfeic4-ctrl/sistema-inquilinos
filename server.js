@@ -506,7 +506,7 @@ app.post('/pagos/registrar', async (req, res) => {
 
     } catch (err) {
         console.log(err);
-        res.send('Error pago');
+        res.send(err.message);
     }
 });
 // =====================
