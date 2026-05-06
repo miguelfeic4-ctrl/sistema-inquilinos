@@ -523,9 +523,18 @@ app.get('/reportes/inquilinos', async (req, res) => {
     `;
 
     const data = result.recordset.filter(i => {
-        const ingreso = new Date(i.fechaIngreso);
-        return ingreso <= fechaFiltro && i.estado !== 'retirado';
-    });
+
+    const ingreso = new Date(i.fechaIngreso);
+    const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
+
+    const fechaFiltro = new Date(anio, mes - 1, 1);
+
+    const activoEnEseMes =
+        ingreso <= fechaFiltro &&
+        (!salida || salida >= fechaFiltro);
+
+    return activoEnEseMes && i.estado !== 'retirado';
+});
 
 res.render('reporte_inquilinos', {
     data,
@@ -589,37 +598,25 @@ app.get('/reportes/pagos', auth, async (req, res) => {
 // =====================
 // 📥 EXCEL INQUILINOS
 // =====================
-app.get('/reportes/inquilinos/excel', auth, async (req, res) => {
+app.get('/reportes/inquilinos/excel', async (req, res) => {
 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Inquilinos');
+    const mes = Number(req.query.mes);
+    const anio = Number(req.query.anio);
 
-    sheet.columns = [
-        { header: 'Nombre', key: 'nombreCompleto', width: 25 },
-        { header: 'DNI', key: 'dni', width: 15 },
-        { header: 'Teléfono', key: 'telefono', width: 15 },
-        { header: 'Correo', key: 'correo', width: 25 },
-        { header: 'Habitación', key: 'habitacion', width: 10 },
-        { header: 'Ingreso', key: 'fechaIngreso', width: 18 },
-        { header: 'Precio', key: 'precio', width: 12 }
-    ];
+    const fechaFiltro = new Date(anio, mes - 1, 1);
 
     const result = await sql.query`SELECT * FROM Inquilinos`;
 
-    result.recordset.forEach(i => {
-        sheet.addRow({
-            ...i,
-            fechaIngreso: i.fechaIngreso ? new Date(i.fechaIngreso) : null
-        });
+    const data = result.recordset.filter(i => {
+        const ingreso = new Date(i.fechaIngreso);
+        const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
+
+        return ingreso <= fechaFiltro &&
+              (!salida || salida >= fechaFiltro) &&
+              i.estado !== 'retirado';
     });
 
-    sheet.getColumn('fechaIngreso').numFmt = 'dd/mm/yyyy';
-
-    res.setHeader('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition','attachment; filename=inquilinos.xlsx');
-
-    await workbook.xlsx.write(res);
-    res.end();
+    // aquí generas Excel con "data"
 });
 app.get('/reportes/pagos/excel', auth, async (req, res) => {
 
