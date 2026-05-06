@@ -576,8 +576,12 @@ app.get('/reportes/pagos', auth, async (req, res) => {
         const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
         const anio = Number(req.query.anio) || new Date().getFullYear();
 
+        const inicioMes = new Date(anio, mes - 1, 1);
+        const finMes = new Date(anio, mes, 0, 23, 59, 59);
+
+        // 🔥 SOLO INQUILINOS ACTIVOS EN ESE MES
         const inquilinos = await sql.query`
-            SELECT id, nombreCompleto, precio
+            SELECT id, nombreCompleto, precio, fechaIngreso, fechaSalida
             FROM Inquilinos
             WHERE estado != 'retirado'
         `;
@@ -590,24 +594,37 @@ app.get('/reportes/pagos', auth, async (req, res) => {
         let total = 0;
         let pagado = 0;
 
-        const detalle = inquilinos.recordset.map(i => {
+        const detalle = inquilinos.recordset
+            .filter(i => {
 
-            const monto = pagos.recordset
-                .filter(p => p.inquilinoId === i.id)
-                .reduce((s, p) => s + Number(p.monto || 0), 0);
+                const ingreso = i.fechaIngreso ? new Date(i.fechaIngreso) : null;
+                const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
 
-            const precio = Number(i.precio || 0);
+                if (!ingreso) return false;
 
-            total += precio;
-            pagado += monto;
+                return (
+                    ingreso <= finMes &&
+                    (!salida || salida >= inicioMes)
+                );
+            })
+            .map(i => {
 
-            return {
-                nombre: i.nombreCompleto,
-                precio,
-                pago: monto,
-                estado: monto >= precio ? 'Pagado' : 'Pendiente'
-            };
-        });
+                const monto = pagos.recordset
+                    .filter(p => p.inquilinoId === i.id)
+                    .reduce((s, p) => s + Number(p.monto || 0), 0);
+
+                const precio = Number(i.precio || 0);
+
+                total += precio;
+                pagado += monto;
+
+                return {
+                    nombre: i.nombreCompleto,
+                    precio,
+                    pago: monto,
+                    estado: monto >= precio ? 'Pagado' : 'Pendiente'
+                };
+            });
 
         res.render('reporte_pagos', {
             total,
@@ -619,8 +636,8 @@ app.get('/reportes/pagos', auth, async (req, res) => {
         });
 
     } catch (err) {
-        console.log('ERROR PAGOS:', err);
-        res.send('Error reporte pagos');
+        console.log("🔥 ERROR REPORTE PAGOS:", err);
+        res.status(500).send("Error reporte pagos");
     }
 });
 // =====================
@@ -693,43 +710,51 @@ app.get('/reportes/inquilinos/excel', auth, async (req, res) => {
 });
 app.get('/reportes/pagos/excel', auth, async (req, res) => {
 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Pagos');
+    try {
 
-    sheet.columns = [
-        { header: 'ID Inquilino', key: 'inquilinoId', width: 15 },
-        { header: 'Mes', key: 'mes', width: 10 },
-        { header: 'Año', key: 'anio', width: 10 },
-        { header: 'Monto', key: 'monto', width: 12 },
-        { header: 'Fecha Pago', key: 'fechaPa', width: 20 }
-    ];
+        const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
+        const anio = Number(req.query.anio) || new Date().getFullYear();
 
-    const result = await sql.query`
-    SELECT * FROM Pas
-    WHERE mes = ${mes} AND anio = ${anio}
-`;
+        const pagos = await sql.query`
+            SELECT * FROM Pas
+            WHERE mes = ${mes} AND anio = ${anio}
+        `;
 
-    result.recordset.forEach(p => {
-        sheet.addRow({
-            ...p,
-            fechaPa: p.fechaPa ? new Date(p.fechaPa) : null
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Pagos');
+
+        sheet.columns = [
+            { header: 'ID Inquilino', key: 'inquilinoId' },
+            { header: 'Mes', key: 'mes' },
+            { header: 'Año', key: 'anio' },
+            { header: 'Monto', key: 'monto' },
+            { header: 'Fecha Pago', key: 'fechaPa' }
+        ];
+
+        pagos.recordset.forEach(p => {
+            sheet.addRow({
+                ...p,
+                fechaPa: p.fechaPa ? new Date(p.fechaPa) : null
+            });
         });
-    });
 
-    sheet.getColumn('fechaPa').numFmt = 'dd/mm/yyyy';
+        res.setHeader(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
 
-    res.setHeader(
-        'Content-Type',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    );
+        res.setHeader(
+            'Content-Disposition',
+            'attachment; filename=pagos.xlsx'
+        );
 
-    res.setHeader(
-        'Content-Disposition',
-        'attachment; filename=pagos.xlsx'
-    );
+        await workbook.xlsx.write(res);
+        res.end();
 
-    await workbook.xlsx.write(res);
-    res.end();
+    } catch (err) {
+        console.log("🔥 ERROR EXCEL PAGOS:", err);
+        res.status(500).send("Error generando Excel pagos");
+    }
 });
 // =====================
 // 🚀 SERVER
