@@ -890,17 +890,33 @@ app.get('/finanzas', auth, async (req, res) => {
     });
 });
 app.post('/finanzas/movimiento', auth, async (req, res) => {
+    try {
 
-    const { tipo, concepto, monto, mes, anio } = req.body;
+        const {
+            tipo,
+            concepto,
+            monto,
+            mes,
+            anio
+        } = req.body;
 
-    await sql.query`
-        INSERT INTO CajaMovimientos
-        (tipo, concepto, monto, mes, anio, usuario)
-        VALUES
-        (${tipo}, ${concepto}, ${monto}, ${mes}, ${anio}, ${req.session.usuario})
-    `;
+        if (!tipo || !concepto || !monto || !mes || !anio) {
+            return res.send('❌ Faltan datos del movimiento');
+        }
 
-    res.redirect('/finanzas?mes=' + mes + '&anio=' + anio);
+        await sql.query`
+            INSERT INTO CajaMovimientos
+            (tipo, concepto, monto, mes, anio, usuario)
+            VALUES
+            (${tipo}, ${concepto}, ${Number(monto)}, ${Number(mes)}, ${Number(anio)}, ${req.session.usuario})
+        `;
+
+        res.redirect('/finanzas?mes=' + mes + '&anio=' + anio);
+
+    } catch (err) {
+        console.log("🔥 ERROR FINANZAS MOVIMIENTO:", err);
+        res.status(500).send('Error interno en finanzas');
+    }
 });
 // =====================
 // 🚀 SERVER

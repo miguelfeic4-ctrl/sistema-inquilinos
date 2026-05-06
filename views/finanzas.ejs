@@ -1,7 +1,6 @@
 <%- include('partials/navbar') %>
 
 <link rel="stylesheet" href="/styles.css">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -11,7 +10,6 @@ body {
     font-family: Arial;
 }
 
-/* HERO */
 .hero {
     background: linear-gradient(135deg, #0f172a, #111827);
     padding: 25px;
@@ -26,7 +24,6 @@ body {
     color: #38bdf8;
 }
 
-/* CARDS */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
@@ -38,7 +35,6 @@ body {
     padding: 18px;
     border-radius: 14px;
     border: 1px solid rgba(56,189,248,0.1);
-    transition: 0.2s;
 }
 
 .card:hover {
@@ -49,7 +45,6 @@ body {
 .positive { color: #22c55e; }
 .negative { color: #ef4444; }
 
-/* MOVIMIENTOS */
 .mov {
     background: #0f172a;
     padding: 10px;
@@ -60,7 +55,6 @@ body {
     border-left: 3px solid #38bdf8;
 }
 
-/* CHART */
 .chart-box {
     background: #111827;
     padding: 20px;
@@ -71,11 +65,11 @@ body {
 
 <div class="container">
 
-<!-- 💳 CAJA PRINCIPAL -->
+<!-- 💳 CAJA -->
 <div class="hero">
     <h3>💰 Caja total</h3>
     <div class="balance">
-        S/ <%= cajaTotal %>
+        S/ <%= cajaTotal || 0 %>
     </div>
     <small>Flujo financiero del sistema</small>
 </div>
@@ -85,29 +79,29 @@ body {
 
     <div class="card">
         <h4>Ingreso mensual</h4>
-        <h2 class="positive">S/ <%= ingresos %></h2>
+        <h2 class="positive">S/ <%= ingresos || 0 %></h2>
     </div>
 
     <div class="card">
         <h4>Egresos</h4>
-        <h2 class="negative">S/ <%= egresos %></h2>
+        <h2 class="negative">S/ <%= egresos || 0 %></h2>
     </div>
 
     <div class="card">
         <h4>Deuda</h4>
-        <h2 class="negative">S/ <%= deuda %></h2>
+        <h2 class="negative">S/ <%= deuda || 0 %></h2>
     </div>
 
     <div class="card">
         <h4>Estado caja</h4>
-        <h2 class="<%= cajaTotal >= 0 ? 'positive' : 'negative' %>">
-            <%= cajaTotal >= 0 ? 'POSITIVO' : 'NEGATIVO' %>
+        <h2 class="<%= (cajaTotal || 0) >= 0 ? 'positive' : 'negative' %>">
+            <%= (cajaTotal || 0) >= 0 ? 'POSITIVO' : 'NEGATIVO' %>
         </h2>
     </div>
 
 </div>
 
-<!-- 📈 GRÁFICO -->
+<!-- 📈 CHART -->
 <div class="chart-box">
     <h3>📊 Flujo de caja</h3>
     <canvas id="chart"></canvas>
@@ -116,18 +110,24 @@ body {
 <!-- 🧾 MOVIMIENTOS -->
 <h3 style="margin-top:20px;">🧾 Últimos movimientos</h3>
 
-<% movimientos.forEach(m => { %>
-    <div class="mov">
-        <div>
-            <b><%= m.concepto %></b><br>
-            <small><%= m.usuario %></small>
-        </div>
+<% if (movimientos && movimientos.length > 0) { %>
 
-        <div class="<%= m.tipo === 'ingreso' ? 'positive' : 'negative' %>">
-            <%= m.tipo === 'ingreso' ? '+' : '-' %> S/ <%= m.monto %>
+    <% movimientos.forEach(m => { %>
+        <div class="mov">
+            <div>
+                <b><%= m.concepto %></b><br>
+                <small><%= m.usuario %></small>
+            </div>
+
+            <div class="<%= m.tipo === 'ingreso' ? 'positive' : 'negative' %>">
+                <%= m.tipo === 'ingreso' ? '+' : '-' %> S/ <%= m.monto %>
+            </div>
         </div>
-    </div>
-<% }) %>
+    <% }) %>
+
+<% } else { %>
+    <p style="opacity:0.6;">No hay movimientos registrados</p>
+<% } %>
 
 </div>
 
@@ -140,7 +140,7 @@ new Chart(ctx, {
         labels: ['Ene','Feb','Mar','Abr','May','Jun'],
         datasets: [{
             label: 'Flujo de caja',
-            data: [1200, 1500, 1100, 1800, 2000, <%= cajaTotal %>],
+            data: [0, 0, 0, 0, 0, <%= cajaTotal || 0 %>],
             borderColor: '#38bdf8'
         }]
     }
