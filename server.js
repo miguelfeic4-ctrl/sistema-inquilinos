@@ -713,13 +713,13 @@ app.get('/reportes/pagos/excel', auth, async (req, res) => {
     try {
 
         const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
-        const anio = Number(req.query.anio) || new Date().getFullYear();
+        const anio = Number(req.query.anio) || (new Date().getFullYear());
 
-        const inicioMes = new Date(anio, mes - 1, 1);
-        const finMes = new Date(anio, mes, 0, 23, 59, 59);
+        const mesActual = new Date().getMonth() + 1;
+        const anioActual = new Date().getFullYear();
 
         const inquilinos = await sql.query`
-            SELECT id, nombreCompleto, precio, fechaIngreso, fechaSalida
+            SELECT id, nombreCompleto, habitacion, precio, fechaIngreso, fechaSalida
             FROM Inquilinos
             WHERE estado != 'retirado'
         `;
@@ -729,35 +729,37 @@ app.get('/reportes/pagos/excel', auth, async (req, res) => {
             WHERE mes = ${mes} AND anio = ${anio}
         `;
 
-        const data = inquilinos.recordset
-            .filter(i => {
+        // 🔥 CASO 1: PASADO → VACÍO SI NO HAY PAGOS
+        if (anio < anioActual || (anio === anioActual && mes < mesActual)) {
 
-                const ingreso = i.fechaIngreso ? new Date(i.fechaIngreso) : null;
-                const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
+            if (pagos.recordset.length === 0) {
+                return res.send('Excel vacío: no hay registros en este mes');
+            }
+        }
 
-                if (!ingreso) return false;
+        // 🔥 CASO 2: FUTURO → TODOS SON DEUDORES
+        const esFuturo =
+            anio > anioActual ||
+            (anio === anioActual && mes > mesActual);
 
-                return (
-                    ingreso <= finMes &&
-                    (!salida || salida >= inicioMes)
-                );
-            })
-            .map(i => {
+        const data = inquilinos.recordset.map(i => {
 
-                const totalPagado = pagos.recordset
+            const precio = Number(i.precio || 0);
+
+            const totalPagado = esFuturo
+                ? 0
+                : pagos.recordset
                     .filter(p => p.inquilinoId === i.id)
                     .reduce((s, p) => s + Number(p.monto || 0), 0);
 
-                const precio = Number(i.precio || 0);
-
-                return {
-                    nombre: i.nombreCompleto,
-                    habitacion: i.habitacion,
-                    precio,
-                    pagado: totalPagado,
-                    estado: totalPagado >= precio ? 'Pagado' : 'No pagado'
-                };
-            });
+            return {
+                nombre: i.nombreCompleto,
+                habitacion: i.habitacion,
+                precio,
+                pagado: totalPagado,
+                estado: totalPagado >= precio ? 'Pagado' : 'No pagado'
+            };
+        });
 
         const ExcelJS = require('exceljs');
         const workbook = new ExcelJS.Workbook();
