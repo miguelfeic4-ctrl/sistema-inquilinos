@@ -1,17 +1,148 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Finanzas</title>
-    <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-
 <%- include('partials/navbar') %>
 
+<link rel="stylesheet" href="/styles.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    background: #0b1220;
+    color: white;
+    font-family: Arial;
+}
+
+/* HERO */
+.hero {
+    background: linear-gradient(135deg, #0f172a, #111827);
+    padding: 25px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 25px rgba(56,189,248,0.15);
+}
+
+.balance {
+    font-size: 34px;
+    font-weight: bold;
+    color: #38bdf8;
+}
+
+/* CARDS */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap: 15px;
+}
+
+.card {
+    background: #111827;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(56,189,248,0.1);
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(56,189,248,0.2);
+}
+
+.positive { color: #22c55e; }
+.negative { color: #ef4444; }
+
+/* MOVIMIENTOS */
+.mov {
+    background: #0f172a;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    border-left: 3px solid #38bdf8;
+}
+
+/* CHART */
+.chart-box {
+    background: #111827;
+    padding: 20px;
+    border-radius: 14px;
+    margin-top: 20px;
+}
+</style>
+
 <div class="container">
-    <h1>📊 Finanzas</h1>
-    <p>Módulo en construcción</p>
+
+<!-- 💳 CAJA PRINCIPAL -->
+<div class="hero">
+    <h3>💰 Caja total</h3>
+    <div class="balance">
+        S/ <%= cajaTotal %>
+    </div>
+    <small>Flujo financiero del sistema</small>
 </div>
 
-</body>
-</html>
+<!-- 📊 CARDS -->
+<div class="grid">
+
+    <div class="card">
+        <h4>Ingreso mensual</h4>
+        <h2 class="positive">S/ <%= ingresos %></h2>
+    </div>
+
+    <div class="card">
+        <h4>Egresos</h4>
+        <h2 class="negative">S/ <%= egresos %></h2>
+    </div>
+
+    <div class="card">
+        <h4>Deuda</h4>
+        <h2 class="negative">S/ <%= deuda %></h2>
+    </div>
+
+    <div class="card">
+        <h4>Estado caja</h4>
+        <h2 class="<%= cajaTotal >= 0 ? 'positive' : 'negative' %>">
+            <%= cajaTotal >= 0 ? 'POSITIVO' : 'NEGATIVO' %>
+        </h2>
+    </div>
+
+</div>
+
+<!-- 📈 GRÁFICO -->
+<div class="chart-box">
+    <h3>📊 Flujo de caja</h3>
+    <canvas id="chart"></canvas>
+</div>
+
+<!-- 🧾 MOVIMIENTOS -->
+<h3 style="margin-top:20px;">🧾 Últimos movimientos</h3>
+
+<% movimientos.forEach(m => { %>
+    <div class="mov">
+        <div>
+            <b><%= m.concepto %></b><br>
+            <small><%= m.usuario %></small>
+        </div>
+
+        <div class="<%= m.tipo === 'ingreso' ? 'positive' : 'negative' %>">
+            <%= m.tipo === 'ingreso' ? '+' : '-' %> S/ <%= m.monto %>
+        </div>
+    </div>
+<% }) %>
+
+</div>
+
+<script>
+const ctx = document.getElementById('chart');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Ene','Feb','Mar','Abr','May','Jun'],
+        datasets: [{
+            label: 'Flujo de caja',
+            data: [1200, 1500, 1100, 1800, 2000, <%= cajaTotal %>],
+            borderColor: '#38bdf8'
+        }]
+    }
+});
+</script>

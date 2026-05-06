@@ -793,6 +793,115 @@ app.get('/reportes/pagos/excel', auth, async (req, res) => {
         res.status(500).send("Error generando Excel pagos");
     }
 });
+app.post('/caja/agregar', auth, async (req, res) => {
+
+    const { descripcion, tipo, monto } = req.body;
+
+    await sql.query`
+        INSERT INTO Caja (descripcion, tipo, monto, usuario)
+        VALUES (${descripcion}, ${tipo}, ${monto}, ${req.session.usuario})
+    `;
+
+    res.redirect('/finanzas');
+});
+app.get('/finanzas', auth, async (req, res) => {
+
+    const caja = await sql.query`
+        SELECT * FROM Caja ORDER BY fecha DESC
+    `;
+
+    const pagos = await sql.query`
+        SELECT SUM(monto) as totalPagos FROM Pas
+    `;
+
+    const ingresosManuales = await sql.query`
+        SELECT SUM(monto) as total FROM Caja WHERE tipo='ingreso'
+    `;
+
+    const egresos = await sql.query`
+        SELECT SUM(monto) as total FROM Caja WHERE tipo='egreso'
+    `;
+
+    const cajaTotal =
+        (pagos.recordset[0].totalPagos || 0) +
+        (ingresosManuales.recordset[0].total || 0) -
+        (egresos.recordset[0].total || 0);
+
+    res.render('finanzas', {
+        caja,
+        cajaTotal
+    });
+});
+app.get('/finanzas', auth, async (req, res) => {
+
+    const mes = Number(req.query.mes) || new Date().getMonth() + 1;
+    const anio = Number(req.query.anio) || new Date().getFullYear();
+
+    // 💰 ingresos por inquilinos
+    const pagos = await sql.query`
+        SELECT SUM(monto) as total
+        FROM Pas
+        WHERE mes=${mes} AND anio=${anio}
+    `;
+
+    // ➕ ingresos manuales
+    const ingresosExtra = await sql.query`
+        SELECT SUM(monto) as total
+        FROM CajaMovimientos
+        WHERE tipo='ingreso' AND mes=${mes} AND anio=${anio}
+    `;
+
+    // ➖ egresos
+    const egresos = await sql.query`
+        SELECT SUM(monto) as total
+        FROM CajaMovimientos
+        WHERE tipo='egreso' AND mes=${mes} AND anio=${anio}
+    `;
+
+    // 🧠 deuda total
+    const deuda = await sql.query`
+        SELECT SUM(precio) as total FROM Inquilinos
+        WHERE estado != 'retirado'
+    `;
+
+    // 🧾 movimientos recientes
+    const movimientos = await sql.query`
+        SELECT TOP 30 *
+        FROM CajaMovimientos
+        ORDER BY fecha DESC
+    `;
+
+    const ingresosTotales =
+        (pagos.recordset[0].total || 0) +
+        (ingresosExtra.recordset[0].total || 0);
+
+    const egresosTotales = egresos.recordset[0].total || 0;
+
+    const cajaTotal = ingresosTotales - egresosTotales;
+
+    res.render('finanzas', {
+        ingresos: ingresosTotales,
+        egresos: egresosTotales,
+        deuda: deuda.recordset[0].total || 0,
+        cajaTotal,
+        movimientos: movimientos.recordset,
+        mes,
+        anio
+    });
+});
+app.post('/finanzas/movimiento', auth, async (req, res) => {
+
+    const { tipo, concepto, monto, mes, anio } = req.body;
+
+    await sql.query`
+        INSERT INTO CajaMovimientos
+        (tipo, concepto, monto, mes, anio, usuario)
+        VALUES
+        (${tipo}, ${concepto}, ${monto}, ${mes}, ${anio}, ${req.session.usuario})
+    `;
+
+    res.redirect('/finanzas?mes=' + mes + '&anio=' + anio);
+});
 // =====================
 // 🚀 SERVER
 // =====================
