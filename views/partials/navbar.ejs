@@ -1,26 +1,113 @@
+<style>
+.navbar {
+    background: #0f172a;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: Arial;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-left {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+}
+
+.nav-right {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 8px;
+    transition: 0.2s;
+    font-size: 14px;
+}
+
+.nav-link:hover {
+    background: #1f2937;
+    color: #38bdf8;
+}
+
+/* ===== DROPDOWN ===== */
+.nav-item {
+    position: relative;
+}
+
+.dropdown-menu-custom {
+    display: none;
+    position: absolute;
+    top: 38px;
+    left: 0;
+    background: #111827;
+    border-radius: 10px;
+    min-width: 180px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    overflow: hidden;
+}
+
+.dropdown-menu-custom a {
+    display: block;
+    padding: 10px 12px;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.dropdown-menu-custom a:hover {
+    background: #1f2937;
+    color: #38bdf8;
+}
+
+.nav-item:hover .dropdown-menu-custom {
+    display: block;
+}
+
+/* LOGO */
+.logo {
+    color: #38bdf8;
+    font-weight: bold;
+    font-size: 16px;
+}
+</style>
+
 <div class="navbar">
 
-    <div class="navbar-title">
-        🏠 Sistema Inquilinos
+    <!-- IZQUIERDA -->
+    <div class="nav-left">
+
+        <div class="logo">🏠 SISTEMA</div>
+
+        <a class="nav-link" href="/">Inicio</a>
+        <a class="nav-link" href="/inquilinos">Inquilinos</a>
+        <a class="nav-link" href="/habitaciones">Habitaciones</a>
+        <a class="nav-link" href="/pagos">Pagos</a>
+        <a class="nav-link" href="/reportes">Reportes</a>
+
+        <!-- FINANZAS DROPDOWN -->
+        <div class="nav-item">
+            <a class="nav-link" href="#">💰 Finanzas ▾</a>
+
+            <div class="dropdown-menu-custom">
+                <a href="/finanzas">📊 Dashboard</a>
+                <a href="/egresos">💸 Egresos</a>
+                <a href="/deudores">🤝 Deudores</a>
+            </div>
+        </div>
+
     </div>
 
-    <div class="navbar-menu">
-        <a href="/">Inicio</a>
-        <a href="/inquilinos">Inquilinos</a>
-        <a href="/habitaciones">Habitaciones</a>
-        <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" id="finanzasDropdown">
-        💰 Finanzas
-    </a>
-
-    <div class="dropdown-menu-custom">
-        <a href="/finanzas">📊 Dashboard</a>
-        <a href="/egresos">💸 Egresos</a>
-        <a href="/deudores">🤝 Deudores</a>
-    </div>
-</li>
-        <a href="/pagos">Pagos</a>
-        <a href="/reportes">Reportes</a>
+    <!-- DERECHA -->
+    <div class="nav-right">
+        <a class="nav-link" href="/logout">🚪 Salir</a>
     </div>
 
 </div>
