@@ -530,13 +530,6 @@ app.get('/reportes/inquilinos', auth, async (req, res) => {
     });
 });
 
-res.render('reporte_inquilinos', {
-    data,
-    mes,
-    anio
-});
-
-
 app.get('/reportes', auth, async (req, res) => {
     const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
     const anio = Number(req.query.anio) || new Date().getFullYear();
