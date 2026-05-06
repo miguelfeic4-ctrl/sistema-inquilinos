@@ -5,6 +5,10 @@
     <link rel="stylesheet" href="/styles.css">
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -16,9 +20,7 @@
             overflow: hidden;
         }
 
-        /* =========================
-           🌐 GRID CYBER BACKGROUND
-        ========================= */
+        /* GRID CYBER */
         body::before {
             content: "";
             position: absolute;
@@ -38,19 +40,7 @@
             to { transform: translate(-60px,-60px) rotate(15deg); }
         }
 
-        /* =========================
-           🌌 CANVAS PARTICULAS
-        ========================= */
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-
-        /* =========================
-           LOGIN BOX
-        ========================= */
+        /* LOGIN BOX */
         .login-box {
             width: 320px;
             padding: 30px;
@@ -61,20 +51,16 @@
             backdrop-filter: blur(14px);
 
             border: 1px solid rgba(56,189,248,0.25);
-
             box-shadow: 0 0 25px rgba(56,189,248,0.15);
 
             text-align: center;
 
-            animation: fadeIn 0.5s ease;
-
             position: relative;
             z-index: 2;
-        }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         h2 {
@@ -82,8 +68,17 @@
             margin-bottom: 15px;
         }
 
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         input {
             width: 100%;
+            max-width: 260px;
+
             padding: 10px;
             margin: 8px 0;
 
@@ -95,8 +90,6 @@
 
             text-align: center;
             outline: none;
-
-            box-sizing: border-box;
         }
 
         input:focus {
@@ -106,6 +99,8 @@
 
         button {
             width: 100%;
+            max-width: 260px;
+
             padding: 10px;
             margin-top: 10px;
 
@@ -126,6 +121,27 @@
             box-shadow: 0 0 15px rgba(56,189,248,0.3);
         }
 
+        /* SHAKE ERROR */
+        .shake {
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+            100% { transform: translateX(0); }
+        }
+
+        .error {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 10px;
+            display: none;
+        }
+
         .login-box::after {
             content: "mikesistem1.0";
             display: block;
@@ -138,68 +154,43 @@
 
 <body>
 
-<!-- 🌌 PARTICULAS -->
-<canvas id="particles"></canvas>
-
-<div class="login-box">
+<div class="login-box" id="loginBox">
 
     <h2>🔐 Acceso al Sistema</h2>
 
-    <form method="POST" action="/login">
+    <form method="POST" action="/login" onsubmit="return handleSubmit(event)">
 
         <input type="text" name="usuario" placeholder="Usuario" required>
         <input type="password" name="password" placeholder="Contraseña" required>
 
         <button type="submit">Ingresar</button>
 
+        <div class="error" id="errorMsg">❌ Usuario o contraseña incorrectos</div>
+
     </form>
 
 </div>
 
 <script>
-const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
+function handleSubmit(e) {
+    const params = new URLSearchParams(window.location.search);
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+    if (params.get("error") === "1") {
+        const box = document.getElementById("loginBox");
+        const error = document.getElementById("errorMsg");
 
-let particles = [];
+        box.classList.add("shake");
+        error.style.display = "block";
 
-for (let i = 0; i < 80; i++) {
-    particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 2,
-        dx: (Math.random() - 0.5) * 0.5,
-        dy: (Math.random() - 0.5) * 0.5
-    });
-}
+        setTimeout(() => {
+            box.classList.remove("shake");
+        }, 500);
 
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for (let p of particles) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(56,189,248,0.7)";
-        ctx.fill();
-
-        p.x += p.dx;
-        p.y += p.dy;
-
-        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+        return false;
     }
 
-    requestAnimationFrame(animate);
+    return true;
 }
-
-animate();
-
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
 </script>
 
 </body>
