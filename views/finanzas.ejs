@@ -126,26 +126,60 @@ body {
 <% if (movimientos && movimientos.length > 0) { %>
 
     <% movimientos.forEach(m => { %>
-    <div class="mov">
+
+    <div class="mov" style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:10px;
+        padding:10px;
+        border:1px solid #333;
+        border-radius:10px;
+    ">
 
         <div>
             <b><%= m.concepto %></b><br>
+
             <small>
-                <%= m.tipo %> - 
-                <%= m.usuario %> - 
+                <%= m.tipo %> -
+                <%= m.usuario %> -
                 <%= new Date(m.fecha).toLocaleString() %>
-            </small>
+            </small><br>
+
+            <span>
+                S/ <%= m.monto %>
+            </span>
         </div>
 
-        <div>
-            S/ <%= m.monto %>
-        </div>
+        <!-- ❌ BOTON ELIMINAR -->
+        <form action="/eliminar-movimiento/<%= m.id %>" method="POST">
+
+            <button
+                type="submit"
+                style="
+                    background:red;
+                    color:white;
+                    border:none;
+                    padding:8px 12px;
+                    border-radius:8px;
+                    cursor:pointer;
+                "
+            >
+                Eliminar
+            </button>
+
+        </form>
 
     </div>
+
 <% }) %>
 
 <% } else { %>
-    <p style="opacity:0.6;">No hay movimientos registrados</p>
+
+    <p style="opacity:0.6;">
+        No hay movimientos registrados
+    </p>
+
 <% } %>
 
 </div>
