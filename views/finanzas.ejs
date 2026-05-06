@@ -74,6 +74,19 @@ body {
     <small>Flujo financiero del sistema</small>
 </div>
 
+<form action="/finanzas/reset-caja" method="POST" onsubmit="return confirm('¿Seguro que quieres reiniciar la caja total a 0?')">
+    <button style="
+        background: #ef4444;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    ">
+        🔄 Reiniciar Caja Total
+    </button>
+</form>
+
 <!-- 📊 CARDS -->
 <div class="grid">
 

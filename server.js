@@ -931,6 +931,25 @@ app.post('/finanzas/movimiento', auth, async (req, res) => {
         res.status(500).send('Error interno en finanzas');
     }
 });
+
+app.post('/finanzas/reset-caja', auth, async (req, res) => {
+    try {
+
+        // Opción A: si guardas caja en BD
+        await sql.query`
+            UPDATE Caja
+            SET total = 0
+        `;
+
+        // Opción B: si no tienes tabla Caja (te lo adapto si quieres)
+
+        res.redirect('/finanzas');
+
+    } catch (err) {
+        console.log(err);
+        res.send('Error al reiniciar caja');
+    }
+});
 app.get('/deudores', auth, async (req, res) => {
     try {
 
