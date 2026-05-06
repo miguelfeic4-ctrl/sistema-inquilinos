@@ -527,11 +527,11 @@ app.get('/reportes/inquilinos', async (req, res) => {
         return ingreso <= fechaFiltro && i.estado !== 'retirado';
     });
 
-    res.render('reportes_inquilinos', {
-        data,
-        mes,
-        anio
-    });
+res.render('reporte_inquilinos', {
+    data,
+    mes,
+    anio
+});
 });
 
 app.get('/reportes', auth, (req, res) => {
@@ -572,12 +572,14 @@ app.get('/reportes/pagos', auth, async (req, res) => {
             };
         });
 
-        res.render('reporte_pagos', {
-            total,
-            pagado,
-            pendiente: total - pagado,
-            detalle
-        });
+    res.render('reporte_pagos', {
+    total,
+    pagado,
+    pendiente: total - pagado,
+    detalle,
+    mes,
+    anio
+});
 
     } catch (err) {
         console.log('ERROR PAGOS:', err);
