@@ -543,8 +543,30 @@ res.render('reporte_inquilinos', {
 });
 });
 
-app.get('/reportes', auth, (req, res) => {
-    res.render('reportes');
+app.get('/reportes', auth, async (req, res) => {
+    const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
+    const anio = Number(req.query.anio) || new Date().getFullYear();
+
+    const inquilinos = await sql.query`
+        SELECT * FROM Inquilinos
+    `;
+
+    const fechaFiltro = new Date(anio, mes - 1, 1);
+
+    const data = inquilinos.recordset.filter(i => {
+        const ingreso = new Date(i.fechaIngreso);
+        const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
+
+        return ingreso <= fechaFiltro &&
+              (!salida || salida >= fechaFiltro) &&
+              i.estado !== 'retirado';
+    });
+
+    res.render('reportes', {
+        data,
+        mes,
+        anio
+    });
 });
 // =====================
 // 📊 REPORTE Pas
@@ -616,7 +638,31 @@ app.get('/reportes/inquilinos/excel', async (req, res) => {
               i.estado !== 'retirado';
     });
 
-    // aquí generas Excel con "data"
+    const ExcelJS = require('exceljs');
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Inquilinos');
+
+    sheet.columns = [
+        { header: 'Nombre', key: 'nombre' },
+        { header: 'DNI', key: 'dni' },
+        { header: 'Habitación', key: 'habitacion' },
+        { header: 'Ingreso', key: 'fechaIngreso' }
+    ];
+
+    data.forEach(i => sheet.addRow(i));
+
+    res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+
+    res.setHeader(
+        'Content-Disposition',
+        'attachment; filename=inquilinos.xlsx'
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
 });
 app.get('/reportes/pagos/excel', auth, async (req, res) => {
 
