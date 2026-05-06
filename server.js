@@ -822,7 +822,7 @@ app.get('/finanzas', auth, async (req, res) => {
             WHERE mes = ${mes} AND anio = ${anio}
         `;
 
-        // 💰 préstamos
+        // 💰 préstamos (dinero que sale)
         const prestamos = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM CajaMovimientos
@@ -830,7 +830,7 @@ app.get('/finanzas', auth, async (req, res) => {
             AND mes = ${mes} AND anio = ${anio}
         `;
 
-        // 💰 pagos de préstamos
+        // 💰 pagos de préstamos (dinero que entra)
         const pagosPrestamos = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM CajaMovimientos
@@ -846,31 +846,25 @@ app.get('/finanzas', auth, async (req, res) => {
             AND mes = ${mes} AND anio = ${anio}
         `;
 
-        // ➖ egresos (AHORA CORRECTO Y UNIFICADO)
+        // ➖ egresos
         const egresosResult = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM Egresos
             WHERE MONTH(fecha) = ${mes} AND YEAR(fecha) = ${anio}
         `;
 
-        const deudaResult = await sql.query`
-    SELECT 
-        ISNULL(SUM(CASE WHEN tipo = 'prestamo' THEN monto ELSE 0 END),0) -
-        ISNULL(SUM(CASE WHEN tipo = 'pago_prestamo' THEN monto ELSE 0 END),0)
-        AS total
-    FROM CajaMovimientos
-`;
-
-const deuda = deudaResult.recordset?.[0]?.total || 0;
-
         const egresos = egresosResult.recordset?.[0]?.total || 0;
 
-        // 🧠 deuda real
-        const deuda = await sql.query`
-            SELECT ISNULL(SUM(precio), 0) as total
-            FROM Inquilinos
-            WHERE estado != 'retirado'
+        // 🤝 DEUDA REAL (PRÉSTAMOS - PAGOS)
+        const deudaResult = await sql.query`
+            SELECT 
+                ISNULL(SUM(CASE WHEN tipo = 'prestamo' THEN monto ELSE 0 END),0) -
+                ISNULL(SUM(CASE WHEN tipo = 'pago_prestamo' THEN monto ELSE 0 END),0)
+                AS total
+            FROM CajaMovimientos
         `;
+
+        const deuda = deudaResult.recordset?.[0]?.total || 0;
 
         // 🧾 movimientos
         const movimientos = await sql.query`
@@ -891,12 +885,11 @@ const deuda = deudaResult.recordset?.[0]?.total || 0;
         const totalPrestamos = prestamos.recordset?.[0]?.total || 0;
         const totalPagosPrestamos = pagosPrestamos.recordset?.[0]?.total || 0;
         const totalIngresosExtra = ingresosExtra.recordset?.[0]?.total || 0;
-        const totalDeuda = deuda.recordset?.[0]?.total || 0;
 
-        // 📊 CÁLCULOS (RESPETANDO TU LÓGICA)
+        // 📊 CÁLCULOS
         const ingresosTotales = totalPagos + totalIngresosExtra;
 
-        const egresosTotales = egresos; // 🔥 FIX AQUÍ
+        const egresosTotales = egresos;
 
         const cajaTotal =
             ingresosTotales -
@@ -907,7 +900,7 @@ const deuda = deudaResult.recordset?.[0]?.total || 0;
         res.render('finanzas', {
             ingresos: ingresosTotales,
             egresos: egresosTotales,
-            deuda: totalDeuda,
+            deuda, // 🔥 YA CORRECTO
             cajaTotal,
             movimientos: movimientos.recordset || [],
             mes,
