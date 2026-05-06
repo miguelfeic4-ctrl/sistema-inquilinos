@@ -715,28 +715,63 @@ app.get('/reportes/pagos/excel', auth, async (req, res) => {
         const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
         const anio = Number(req.query.anio) || new Date().getFullYear();
 
+        const inicioMes = new Date(anio, mes - 1, 1);
+        const finMes = new Date(anio, mes, 0, 23, 59, 59);
+
+        const inquilinos = await sql.query`
+            SELECT id, nombreCompleto, precio, fechaIngreso, fechaSalida
+            FROM Inquilinos
+            WHERE estado != 'retirado'
+        `;
+
         const pagos = await sql.query`
             SELECT * FROM Pas
             WHERE mes = ${mes} AND anio = ${anio}
         `;
 
+        const data = inquilinos.recordset
+            .filter(i => {
+
+                const ingreso = i.fechaIngreso ? new Date(i.fechaIngreso) : null;
+                const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
+
+                if (!ingreso) return false;
+
+                return (
+                    ingreso <= finMes &&
+                    (!salida || salida >= inicioMes)
+                );
+            })
+            .map(i => {
+
+                const totalPagado = pagos.recordset
+                    .filter(p => p.inquilinoId === i.id)
+                    .reduce((s, p) => s + Number(p.monto || 0), 0);
+
+                const precio = Number(i.precio || 0);
+
+                return {
+                    nombre: i.nombreCompleto,
+                    habitacion: i.habitacion,
+                    precio,
+                    pagado: totalPagado,
+                    estado: totalPagado >= precio ? 'Pagado' : 'No pagado'
+                };
+            });
+
+        const ExcelJS = require('exceljs');
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet('Pagos');
 
         sheet.columns = [
-            { header: 'ID Inquilino', key: 'inquilinoId' },
-            { header: 'Mes', key: 'mes' },
-            { header: 'Año', key: 'anio' },
-            { header: 'Monto', key: 'monto' },
-            { header: 'Fecha Pago', key: 'fechaPa' }
+            { header: 'Nombre', key: 'nombre' },
+            { header: 'Habitación', key: 'habitacion' },
+            { header: 'Precio', key: 'precio' },
+            { header: 'Pagado', key: 'pagado' },
+            { header: 'Estado', key: 'estado' }
         ];
 
-        pagos.recordset.forEach(p => {
-            sheet.addRow({
-                ...p,
-                fechaPa: p.fechaPa ? new Date(p.fechaPa) : null
-            });
-        });
+        data.forEach(d => sheet.addRow(d));
 
         res.setHeader(
             'Content-Type',
@@ -745,7 +780,7 @@ app.get('/reportes/pagos/excel', auth, async (req, res) => {
 
         res.setHeader(
             'Content-Disposition',
-            'attachment; filename=pagos.xlsx'
+            `attachment; filename=pagos_${mes}_${anio}.xlsx`
         );
 
         await workbook.xlsx.write(res);
