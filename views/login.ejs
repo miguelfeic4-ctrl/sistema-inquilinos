@@ -6,42 +6,112 @@
 
     <style>
         body {
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
-            background:#f3f4f6;
+            margin: 0;
+            font-family: Arial, sans-serif;
+
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: #0b1220;
         }
 
+        /* =========================
+           LOGIN BOX GLASS NEON
+        ========================= */
         .login-box {
-            background:white;
-            padding:30px;
-            border-radius:12px;
-            width:300px;
-            box-shadow:0 5px 20px rgba(0,0,0,0.1);
-            text-align:center;
+            width: 320px;
+            padding: 30px;
+
+            border-radius: 16px;
+
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(14px);
+
+            border: 1px solid rgba(56,189,248,0.2);
+
+            box-shadow: 0 0 25px rgba(56,189,248,0.15);
+
+            text-align: center;
+
+            animation: fadeIn 0.5s ease;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* =========================
+           TITULO
+        ========================= */
+        .login-box h2 {
+            color: #38bdf8;
+            margin-bottom: 20px;
+        }
+
+        /* =========================
+           INPUTS
+        ========================= */
         input {
-            width:100%;
-            padding:10px;
-            margin:8px 0;
-            border:1px solid #ddd;
-            border-radius:6px;
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+
+            background: rgba(0,0,0,0.25);
+            color: white;
+
+            outline: none;
+            text-align: center;
+
+            transition: 0.2s;
         }
 
+        input:focus {
+            border: 1px solid #38bdf8;
+            box-shadow: 0 0 10px rgba(56,189,248,0.3);
+        }
+
+        /* =========================
+           BOTON
+        ========================= */
         button {
-            width:100%;
-            padding:10px;
-            background:#1f2937;
-            color:white;
-            border:none;
-            border-radius:6px;
-            cursor:pointer;
+            width: 100%;
+            padding: 10px;
+
+            margin-top: 10px;
+
+            border-radius: 10px;
+            border: none;
+
+            cursor: pointer;
+
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
+            color: white;
+
+            font-weight: bold;
+
+            transition: 0.2s;
         }
 
         button:hover {
-            background:#374151;
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(56,189,248,0.3);
+        }
+
+        /* =========================
+           MINI FOOTER (OPCIONAL PRO)
+        ========================= */
+        .login-box::after {
+            content: "Sistema de Inquilinos";
+            display: block;
+            margin-top: 15px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
         }
     </style>
 </head>
@@ -49,14 +119,19 @@
 <body>
 
 <div class="login-box">
-    <h2>🔐 Login</h2>
+
+    <h2>🔐 Acceso al Sistema</h2>
 
     <form method="POST" action="/login">
+
         <input type="text" name="usuario" placeholder="Usuario" required>
+
         <input type="password" name="password" placeholder="Contraseña" required>
 
         <button type="submit">Ingresar</button>
+
     </form>
+
 </div>
 
 </body>

@@ -5,63 +5,142 @@
     <link rel="stylesheet" href="/styles.css">
 
 <style>
-    .dashboard {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-        margin-top: 20px;
-    }
+body {
+    background: #0f172a;
+    color: white;
+}
 
-    .card {
-        padding: 20px;
-        border-radius: 12px;
-        background: white;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        text-align: center;
-    }
+/* =========================
+   📊 DASHBOARD CARDS
+========================= */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
 
-    .circle-container {
-        display: flex;
-        justify-content: center;
-        margin: 30px 0;
-    }
+.card {
+    padding: 20px;
+    border-radius: 14px;
+    background: #111827;
+    border: 1px solid rgba(56,189,248,0.15);
+    box-shadow: 0 0 20px rgba(56,189,248,0.06);
+    text-align: center;
+    transition: 0.2s;
+}
 
-    .circle {
-        width: 200px;
-        height: 200px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 25px rgba(56,189,248,0.18);
+}
 
-    table {
-        margin-top: 25px;
-        width: 100%;
-        border-collapse: collapse;
-    }
+/* =========================
+   📅 FILTRO
+========================= */
+form select,
+form input {
+    background: #111827;
+    color: white;
+    border: 1px solid rgba(56,189,248,0.2);
+    padding: 10px;
+    border-radius: 10px;
+    outline: none;
+    margin-right: 10px;
+}
 
-    th, td {
-        padding: 10px;
-        border-bottom: 1px solid #e5e7eb;
-        text-align: center;
-    }
+form select:focus,
+form input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56,189,248,0.2);
+}
 
-    .btn {
-        padding: 6px 10px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-    }
+/* =========================
+   🔵 CÍRCULO PROGRESO
+========================= */
+.circle-container {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
 
-    .btn-pagar {
-        background: #22c55e;
-        color: white;
-    }
+.circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    .moroso {
-        background: #ffe6e6;
-    }
+/* =========================
+   📋 TABLA PRO
+========================= */
+table {
+    margin-top: 25px;
+    width: 100%;
+    border-collapse: collapse;
+    background: #111827;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+th {
+    background: #1f2937;
+    color: #38bdf8;
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    text-align: center;
+    color: #e5e7eb;
+}
+
+tr:hover {
+    background: rgba(56,189,248,0.05);
+}
+
+/* =========================
+   🔘 BOTÓN PAGAR
+========================= */
+.btn {
+    padding: 7px 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-pagar {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: black;
+}
+
+.btn-pagar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 10px rgba(34,197,94,0.4);
+}
+
+/* =========================
+   ⚠ ESTADOS
+========================= */
+.moroso {
+    background: rgba(239,68,68,0.08);
+}
+
+/* =========================
+   🧠 TEXTO ESTADOS
+========================= */
+.estado-pagado { color: #22c55e; font-weight: bold; }
+.estado-parcial { color: #facc15; font-weight: bold; }
+.estado-moroso { color: #ef4444; font-weight: bold; }
+.estado-pendiente { color: #fb7185; }
 </style>
 
 </head>
@@ -75,14 +154,14 @@
 <h1>💰 Dashboard de Pagos</h1>
 
 <!-- 🔽 FILTRO -->
-<form method="GET" id="filtroForm">
+<form id="filtroForm" method="GET">
 
-    <select name="mes" onchange="this.form.submit()">
+    <select name="mes" id="mes">
         <% const meses = [
             "Enero","Febrero","Marzo","Abril","Mayo","Junio",
             "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
         ]; %>
-    
+
         <% meses.forEach((m, i) => { %>
             <option value="<%= i + 1 %>" <%= Number(mes) === (i + 1) ? 'selected' : '' %>>
                 <%= m %>
@@ -103,10 +182,10 @@ document.getElementById('mes').addEventListener('change', () => {
 <!-- 🔵 PROGRESO -->
 <div class="circle-container">
     <div class="circle"
-        style="background: conic-gradient(#22c55e <%= total > 0 ? (pagado / total) * 360 : 0 %>deg,#e5e7eb 0deg);">
+        style="background: conic-gradient(#22c55e <%= total > 0 ? (pagado / total) * 360 : 0 %>deg,#1f2937 0deg);">
 
         <div style="
-            background:white;
+            background:#111827;
             border-radius:50%;
             width:140px;
             height:140px;
@@ -114,9 +193,10 @@ document.getElementById('mes').addEventListener('change', () => {
             align-items:center;
             justify-content:center;
             flex-direction:column;
+            border:1px solid rgba(56,189,248,0.2);
         ">
-            <span>Pagado</span>
-            <strong>S/ <%= pagado %></strong>
+            <span style="color:#94a3b8;">Pagado</span>
+            <strong style="color:#38bdf8;">S/ <%= pagado %></strong>
         </div>
 
     </div>
@@ -124,6 +204,7 @@ document.getElementById('mes').addEventListener('change', () => {
 
 <!-- 📊 RESUMEN -->
 <div class="dashboard">
+
     <div class="card">
         <h3>Total esperado</h3>
         <h2>S/ <%= total %></h2>
@@ -131,88 +212,84 @@ document.getElementById('mes').addEventListener('change', () => {
 
     <div class="card">
         <h3>Pagado</h3>
-        <h2 style="color:green;">S/ <%= pagado %></h2>
+        <h2 style="color:#22c55e;">S/ <%= pagado %></h2>
     </div>
 
     <div class="card">
         <h3>Pendiente</h3>
-        <h2 style="color:red;">S/ <%= pendiente %></h2>
+        <h2 style="color:#ef4444;">S/ <%= pendiente %></h2>
     </div>
+
 </div>
 
 <!-- 📋 TABLA -->
 <h2 style="margin-top:30px;">📋 Detalle por Inquilino</h2>
 
 <table>
-    <tr>
-        <th>Nombre</th>
-        <th>Habitación</th>
-        <th>Precio</th>
-        <th>Pagado</th>
-        <th>Día pago</th>
-        <th>Estado</th>
-        <th>Acción</th>
-    </tr>
 
-    <% data.forEach(i => { 
-        const restante = Math.max(0, i.precio - i.pago);
-    %>
+<tr>
+    <th>Nombre</th>
+    <th>Habitación</th>
+    <th>Precio</th>
+    <th>Pagado</th>
+    <th>Día pago</th>
+    <th>Estado</th>
+    <th>Acción</th>
+</tr>
 
-    <tr class="<%= i.estadoPago === 'moroso' ? 'moroso' : '' %>">
+<% data.forEach(i => { 
+    const restante = Math.max(0, i.precio - i.pago);
+%>
 
-        <td><%= i.nombreCompleto %></td>
-        <td><%= i.habitacion %></td>
-        <td>S/ <%= i.precio %></td>
-        <td>S/ <%= i.pago %></td>
+<tr class="<%= i.estadoPago === 'moroso' ? 'moroso' : '' %>">
 
-        <td>
-            <%= i.fechaIngreso ? new Date(i.fechaIngreso).getDate() : '-' %>
-        </td>
+    <td><%= i.nombreCompleto %></td>
+    <td><%= i.habitacion %></td>
+    <td>S/ <%= i.precio %></td>
+    <td>S/ <%= i.pago %></td>
 
-        <td>
-            <% if (i.estadoPago === 'pagado') { %>
-                <span style="color:green;font-weight:bold;">Pagado</span>
-            <% } else if (i.estadoPago === 'parcial') { %>
-                <span style="color:orange;font-weight:bold;">Parcial</span>
-            <% } else if (i.estadoPago === 'moroso') { %>
-                <span style="color:red;font-weight:bold;">Moroso</span>
-            <% } else { %>
-                <span style="color:red;">Pendiente</span>
-            <% } %>
-        </td>
+    <td>
+        <%= i.fechaIngreso ? new Date(i.fechaIngreso).getDate() : '-' %>
+    </td>
 
-        <td>
-            <% if (i.estadoPago !== 'pagado' && restante > 0) { %>
+    <td>
+        <% if (i.estadoPago === 'pagado') { %>
+            <span class="estado-pagado">✔ Pagado</span>
+        <% } else if (i.estadoPago === 'parcial') { %>
+            <span class="estado-parcial">⚠ Parcial</span>
+        <% } else if (i.estadoPago === 'moroso') { %>
+            <span class="estado-moroso">❌ Moroso</span>
+        <% } else { %>
+            <span class="estado-pendiente">Pendiente</span>
+        <% } %>
+    </td>
 
-                <form action="/pagos/registrar" method="POST">
-                    <input type="hidden" name="inquilinoId" value="<%= i.id %>">
-                    <input type="hidden" name="mes" value="<%= mes %>">
-                    <input type="hidden" name="anio" value="<%= anio %>">
-                    <input type="hidden" name="monto" value="<%= restante %>">
+    <td>
+        <% if (i.estadoPago !== 'pagado' && restante > 0) { %>
 
-                    <button class="btn btn-pagar">
-                        Pagar S/ <%= restante %>
-                    </button>
-                </form>
+        <form action="/pagos/registrar" method="POST">
+            <input type="hidden" name="inquilinoId" value="<%= i.id %>">
+            <input type="hidden" name="mes" value="<%= mes %>">
+            <input type="hidden" name="anio" value="<%= anio %>">
+            <input type="hidden" name="monto" value="<%= restante %>">
 
-            <% } else { %>
-                ✔
-            <% } %>
-        </td>
+            <button class="btn btn-pagar">
+                Pagar S/ <%= restante %>
+            </button>
+        </form>
 
-    </tr>
+        <% } else { %>
+            ✔
+        <% } %>
+    </td>
 
-    <% }) %>
+</tr>
+
+<% }) %>
 
 </table>
 
 </div>
-
-<script>
-document.getElementById('mesSelect').addEventListener('change', function () {
-    document.getElementById('formFiltro').submit();
-});
-</script>
 
 </body>
 </html>

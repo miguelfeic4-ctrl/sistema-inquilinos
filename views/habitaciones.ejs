@@ -32,27 +32,18 @@
         padding: 18px;
         border: 1px solid rgba(56,189,248,0.15);
         text-align: center;
-        transition: 0.2s;
     }
 
-    .card:hover {
-        transform: translateY(-3px);
-    }
-
-    /* 🟢 OCUPADAS = BUENO */
+    /* 🟢 OCUPADAS */
     .card.ocupadas {
         border: 1px solid #22c55e;
-        box-shadow: 0 0 12px rgba(34,197,94,0.3);
+        box-shadow: 0 0 12px rgba(34,197,94,0.25);
     }
 
-    /* 🔴 LIBRES = MALO */
+    /* 🔴 LIBRES */
     .card.libres {
         border: 1px solid #ef4444;
-        box-shadow: 0 0 12px rgba(239,68,68,0.3);
-    }
-
-    .card h2 {
-        margin: 5px 0 0;
+        box-shadow: 0 0 12px rgba(239,68,68,0.25);
     }
 
     /* =========================
@@ -79,29 +70,27 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
 
         min-height: 160px;
 
         overflow: hidden;
-
         transition: 0.2s;
     }
 
-    /* 🟢 OCUPADA (BUENO) */
     .room-card.ocupada {
         border: 1px solid #22c55e;
-        box-shadow: 0 0 12px rgba(34,197,94,0.35);
+        box-shadow: inset 0 0 0 1px rgba(34,197,94,0.4),
+                    0 0 12px rgba(34,197,94,0.25);
     }
 
-    /* 🔴 LIBRE (MALO) */
     .room-card.libre {
         border: 1px solid #ef4444;
-        box-shadow: 0 0 12px rgba(239,68,68,0.35);
+        box-shadow: inset 0 0 0 1px rgba(239,68,68,0.4),
+                    0 0 12px rgba(239,68,68,0.25);
     }
 
     /* =========================
-       BADGE NEON
+       BADGE
     ========================= */
     .badge-status {
         position: absolute;
@@ -114,92 +103,100 @@
 
         font-weight: bold;
         text-transform: capitalize;
-        border: 1px solid;
     }
 
     .room-card.ocupada .badge-status {
         background: #22c55e;
         color: #0b0f14;
-        border-color: #22c55e;
-        box-shadow: 0 0 10px rgba(34,197,94,0.6);
     }
 
     .room-card.libre .badge-status {
         background: #ef4444;
         color: white;
-        border-color: #ef4444;
-        box-shadow: 0 0 10px rgba(239,68,68,0.6);
     }
 
     /* =========================
-       TEXTO
+       NUMERO HABITACION
     ========================= */
     .room-number {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: bold;
-        margin-bottom: 6px;
-    }
-
-    .tenant {
-        font-size: 12px;
-        color: #cbd5e1;
-        margin-bottom: 8px;
-        text-align: center;
-    }
-
-    .available {
-        font-size: 12px;
-        color: #94a3b8;
-        margin-bottom: 8px;
+        margin-top: 10px;
     }
 
     /* =========================
-       FORM CENTRADO FIX
+       INQUILINO (REDUCIDO)
+    ========================= */
+    .tenant {
+        font-size: 11px;
+        color: #cbd5e1;
+        margin: 6px 0;
+        text-align: center;
+
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* =========================
+       FORM MINI PERO VISIBLE (BORDES INTERNOS)
     ========================= */
     form {
-        width: 100%;
+        width: 85%;
+        margin-top: auto;
+
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 6px;
-        margin-top: auto;
+
+        padding: 8px;
+        border-radius: 12px;
+
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(0,0,0,0.15);
     }
 
     input {
-        width: 75px;
+        width: 80%;
         padding: 5px;
 
         border-radius: 8px;
         border: 1px solid rgba(255,255,255,0.1);
 
-        background: rgba(0,0,0,0.25);
+        background: rgba(0,0,0,0.3);
         color: white;
 
         text-align: center;
         font-size: 12px;
     }
 
-    input:focus {
-        outline: none;
-        border: 1px solid #38bdf8;
-    }
-
     button {
-        width: 75px;
+        width: 80%;
         padding: 5px;
 
         font-size: 11px;
         border-radius: 8px;
-        border: none;
 
+        border: none;
         cursor: pointer;
 
-        background: rgba(56,189,248,0.2);
+        background: rgba(56,189,248,0.25);
         color: white;
     }
 
     button:hover {
-        background: rgba(56,189,248,0.35);
+        background: rgba(56,189,248,0.4);
+    }
+
+    /* =========================
+       DISPONIBLE
+    ========================= */
+    .available {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 10px;
     }
 </style>
 
@@ -207,16 +204,16 @@
 
 <h1>🏢 Dashboard de Habitaciones</h1>
 
-<!-- 📊 RESUMEN -->
+<!-- RESUMEN -->
 <div class="grid-summary">
 
     <div class="card ocupadas">
-        <h3>🟢 Ocupadas (Bueno)</h3>
+        <h3>🟢 Ocupadas</h3>
         <h2><%= ocupadas %></h2>
     </div>
 
     <div class="card libres">
-        <h3>🔴 Libres (Disponible)</h3>
+        <h3>🔴 Libres</h3>
         <h2><%= libres %></h2>
     </div>
 
@@ -234,9 +231,7 @@
 
         <div class="room-card <%= h.estado %>">
 
-            <div class="badge-status">
-                <%= h.estado %>
-            </div>
+            <div class="badge-status"><%= h.estado %></div>
 
             <div class="room-number"><%= h.numero %></div>
 
@@ -256,7 +251,7 @@
 
             <% } else { %>
 
-                <div class="available">Disponible</div>
+                <div class="available">Sin inquilino</div>
 
             <% } %>
 
