@@ -805,32 +805,45 @@ app.post('/caja/agregar', auth, async (req, res) => {
     res.redirect('/finanzas');
 });
 app.get('/finanzas', auth, async (req, res) => {
+    try {
 
-    const caja = await sql.query`
-        SELECT * FROM Caja ORDER BY fecha DESC
-    `;
+        const mes = new Date().getMonth() + 1;
+        const anio = new Date().getFullYear();
 
-    const pagos = await sql.query`
-        SELECT SUM(monto) as totalPagos FROM Pas
-    `;
+        const caja = await sql.query`
+            SELECT * FROM Caja
+            WHERE mes = ${mes} AND anio = ${anio}
+        `;
 
-    const ingresosManuales = await sql.query`
-        SELECT SUM(monto) as total FROM Caja WHERE tipo='ingreso'
-    `;
+        const movimientos = await sql.query`
+            SELECT TOP 20 * FROM CajaMovimientos
+            WHERE mes = ${mes} AND anio = ${anio}
+            ORDER BY fecha DESC
+        `;
 
-    const egresos = await sql.query`
-        SELECT SUM(monto) as total FROM Caja WHERE tipo='egreso'
-    `;
+        let ingresos = 0;
+        let egresos = 0;
 
-    const cajaTotal =
-        (pagos.recordset[0].totalPagos || 0) +
-        (ingresosManuales.recordset[0].total || 0) -
-        (egresos.recordset[0].total || 0);
+        caja.recordset.forEach(c => {
+            if (c.tipo === 'ingreso') ingresos += Number(c.monto || 0);
+            if (c.tipo === 'egreso') egresos += Number(c.monto || 0);
+        });
 
-    res.render('finanzas', {
-        caja,
-        cajaTotal
-    });
+        const deuda = 0;
+        const cajaTotal = ingresos - egresos;
+
+        return res.render('finanzas', {
+            ingresos: ingresos || 0,
+            egresos: egresos || 0,
+            deuda: deuda || 0,
+            cajaTotal: cajaTotal || 0,
+            movimientos: movimientos.recordset || []
+        });
+
+    } catch (err) {
+        console.log("❌ FINANZAS ERROR:", err);
+        return res.status(500).send("Error en finanzas");
+    }
 });
 app.get('/finanzas', auth, async (req, res) => {
 
