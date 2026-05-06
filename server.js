@@ -847,12 +847,15 @@ app.get('/finanzas', auth, async (req, res) => {
         `;
 
         // ➖ egresos
-        const egresos = await sql.query`
-            SELECT SUM(monto) as total
-            FROM CajaMovimientos
-            WHERE tipo='egreso'
-            AND mes = ${mes} AND anio = ${anio}
-        `;
+       const mesActual = new Date().toISOString().slice(0,7);
+
+const egresosResult = await sql.query`
+    SELECT SUM(monto) as total
+    FROM Egresos
+    WHERE CONVERT(varchar(7), fecha, 120) = ${mesActual}
+`;
+
+const egresos = egresosResult.recordset[0].total || 0;
 
         // 🧠 deuda real (inquilinos activos)
         const deuda = await sql.query`
