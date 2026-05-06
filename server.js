@@ -811,49 +811,62 @@ app.get('/finanzas', auth, async (req, res) => {
         const mes = Number(req.query.mes) || new Date().getMonth() + 1;
         const anio = Number(req.query.anio) || new Date().getFullYear();
 
-        // 💰 ingresos por pagos
+        // 💰 pagos inquilinos
         const pagos = await sql.query`
             SELECT SUM(monto) as total
             FROM Pas
             WHERE mes = ${mes} AND anio = ${anio}
         `;
-const prestamos = await sql.query`
-    SELECT SUM(monto) as total
-    FROM CajaMovimientos
-    WHERE tipo = 'prestamo'
-    AND mes = ${mes} AND anio = ${anio}
-`;
 
-const pagosPrestamos = await sql.query`
-    SELECT SUM(monto) as total
-    FROM CajaMovimientos
-    WHERE tipo = 'pago_prestamo'
-    AND mes = ${mes} AND anio = ${anio}
-`;
-        // ➕ ingresos manuales
+        // 💰 préstamos
+        const prestamos = await sql.query`
+            SELECT SUM(monto) as total
+            FROM CajaMovimientos
+            WHERE tipo = 'prestamo'
+            AND mes = ${mes} AND anio = ${anio}
+        `;
+
+        // 💰 pagos de préstamos
+        const pagosPrestamos = await sql.query`
+            SELECT SUM(monto) as total
+            FROM CajaMovimientos
+            WHERE tipo = 'pago_prestamo'
+            AND mes = ${mes} AND anio = ${anio}
+        `;
+
+        // ➕ ingresos extra
         const ingresosExtra = await sql.query`
             SELECT SUM(monto) as total
             FROM CajaMovimientos
-            WHERE tipo='ingreso' AND mes = ${mes} AND anio = ${anio}
+            WHERE tipo='ingreso'
+            AND mes = ${mes} AND anio = ${anio}
         `;
 
         // ➖ egresos
         const egresos = await sql.query`
             SELECT SUM(monto) as total
             FROM CajaMovimientos
-            WHERE tipo='egreso' AND mes = ${mes} AND anio = ${anio}
+            WHERE tipo='egreso'
+            AND mes = ${mes} AND anio = ${anio}
         `;
 
-        // 🧠 deuda total
+        // 🧠 deuda real (inquilinos activos)
         const deuda = await sql.query`
             SELECT SUM(precio) as total
             FROM Inquilinos
             WHERE estado != 'retirado'
         `;
 
-        // 🧾 movimientos
+        // 🧾 movimientos con fecha
         const movimientos = await sql.query`
-            SELECT TOP 30 *
+            SELECT TOP 50
+                tipo,
+                concepto,
+                monto,
+                fecha,
+                usuario,
+                mes,
+                anio
             FROM CajaMovimientos
             ORDER BY fecha DESC
         `;
@@ -865,19 +878,20 @@ const pagosPrestamos = await sql.query`
         const egresosTotales = egresos.recordset[0].total || 0;
 
         const cajaTotal =
-    ingresosTotales -
-    egresosTotales -
-    (prestamos.recordset[0].total || 0);
+            ingresosTotales -
+            egresosTotales -
+            (prestamos.recordset[0].total || 0) +
+            (pagosPrestamos.recordset[0].total || 0);
 
         res.render('finanzas', {
-    ingresos: ingresosTotales,
-    egresos: egresosTotales,
-    deuda: deuda.recordset[0].total || 0,
-    cajaTotal,
-    movimientos: movimientos.recordset || [],
-    mes,
-    anio
-});
+            ingresos: ingresosTotales,
+            egresos: egresosTotales,
+            deuda: deuda.recordset[0].total || 0,
+            cajaTotal,
+            movimientos: movimientos.recordset || [],
+            mes,
+            anio
+        });
 
     } catch (err) {
         console.log("❌ ERROR FINANZAS:", err);
@@ -919,6 +933,7 @@ app.get('/deudores', auth, async (req, res) => {
         const mes = Number(req.query.mes) || new Date().getMonth() + 1;
         const anio = Number(req.query.anio) || new Date().getFullYear();
 
+        // préstamos
         const prestamos = await sql.query`
             SELECT *
             FROM CajaMovimientos
@@ -928,18 +943,35 @@ app.get('/deudores', auth, async (req, res) => {
             ORDER BY fecha DESC
         `;
 
-        const totalResult = await sql.query`
-            SELECT ISNULL(SUM(monto), 0) as total
+        // pagos de préstamos
+        const pagos = await sql.query`
+            SELECT concepto, SUM(monto) as pagado
             FROM CajaMovimientos
-            WHERE tipo = 'prestamo'
+            WHERE tipo = 'pago_prestamo'
             AND mes = ${mes}
             AND anio = ${anio}
+            GROUP BY concepto
         `;
 
-        const total = totalResult.recordset[0].total || 0;
+        const mapaPagos = {};
+        pagos.recordset.forEach(p => {
+            mapaPagos[p.concepto] = p.pagado;
+        });
+
+        const prestamosConSaldo = prestamos.recordset.map(p => {
+            const pagado = mapaPagos[p.concepto] || 0;
+
+            return {
+                ...p,
+                pagado,
+                saldo: p.monto - pagado
+            };
+        });
+
+        const total = prestamosConSaldo.reduce((s, p) => s + p.saldo, 0);
 
         res.render('deudores', {
-            prestamos: prestamos.recordset || [],
+            prestamos: prestamosConSaldo,
             total,
             mes,
             anio

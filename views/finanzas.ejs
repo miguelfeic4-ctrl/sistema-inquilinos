@@ -113,17 +113,23 @@ body {
 <% if (movimientos && movimientos.length > 0) { %>
 
     <% movimientos.forEach(m => { %>
-        <div class="mov">
-            <div>
-                <b><%= m.concepto %></b><br>
-                <small><%= m.usuario %></small>
-            </div>
+    <div class="mov">
 
-            <div class="<%= m.tipo === 'ingreso' ? 'positive' : 'negative' %>">
-                <%= m.tipo === 'ingreso' ? '+' : '-' %> S/ <%= m.monto %>
-            </div>
+        <div>
+            <b><%= m.concepto %></b><br>
+            <small>
+                <%= m.tipo %> - 
+                <%= m.usuario %> - 
+                <%= new Date(m.fecha).toLocaleString() %>
+            </small>
         </div>
-    <% }) %>
+
+        <div>
+            S/ <%= m.monto %>
+        </div>
+
+    </div>
+<% }) %>
 
 <% } else { %>
     <p style="opacity:0.6;">No hay movimientos registrados</p>

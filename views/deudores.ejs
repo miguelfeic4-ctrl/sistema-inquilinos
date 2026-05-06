@@ -101,24 +101,27 @@ button {
     <h3>📊 Historial de movimientos</h3>
 
     <% prestamos.forEach(p => { %>
-        <div class="mov">
 
-            <div>
-                <b><%= p.concepto %></b><br>
+    <div class="mov">
 
-                <small>
-                    👤 <%= p.usuario %> |
-                    📅 <%= new Date(p.fecha).toLocaleString() %> |
-                    🧾 <%= p.tipo %>
-                </small>
-            </div>
+        <div>
+            <b><%= p.concepto %></b><br>
 
-            <div style="color:<%= p.tipo === 'prestamo' ? '#fbbf24' : '#22c55e' %>">
-                <%= p.tipo === 'prestamo' ? '-' : '+' %> S/ <%= p.monto %>
-            </div>
+            <small>
+                <%= new Date(p.fecha).toLocaleString() %>
+            </small>
 
         </div>
-    <% }) %>
+
+        <div>
+            Monto: S/ <%= p.monto %><br>
+            Pagado: S/ <%= p.pagado %><br>
+            Saldo: S/ <%= p.saldo %>
+        </div>
+
+    </div>
+
+<% }) %>
 
 </div>
 
