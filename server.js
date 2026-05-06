@@ -52,20 +52,24 @@ connectDB();
 // 🧠 FUNCIONES
 // =====================
 function generarHabitaciones() {
-    const pisos = [2, 3, 4];
-    let habitaciones = [];
+    return [
+        // 1er piso
+        { numero: '101' },
 
-    pisos.forEach(p => {
-        for (let i = 1; i <= 5; i++) {
-            habitaciones.push({
-                numero: `${p}${i.toString().padStart(2, '0')}`
-            });
-        }
-    });
+        // 2do piso (6 cuartos)
+        { numero: '201' }, { numero: '202' }, { numero: '203' },
+        { numero: '204' }, { numero: '205' }, { numero: '206' },
 
-    return habitaciones;
+        // 3er piso (6 frente + 3 atrás)
+        { numero: '301' }, { numero: '302' }, { numero: '303' },
+        { numero: '304' }, { numero: '305' }, { numero: '306' },
+        { numero: '307' }, { numero: '308' }, { numero: '309' },
+
+        // 4to piso (8 cuartos)
+        { numero: '401' }, { numero: '402' }, { numero: '403' }, { numero: '404' },
+        { numero: '405' }, { numero: '406' }, { numero: '407' }, { numero: '408' }
+    ];
 }
-
 function esMoroso(fechaIngreso, montoPagado, precio) {
     if (!fechaIngreso) return false;
 
