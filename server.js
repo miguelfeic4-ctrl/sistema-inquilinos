@@ -817,6 +817,12 @@ app.get('/finanzas', auth, async (req, res) => {
             FROM Pas
             WHERE mes = ${mes} AND anio = ${anio}
         `;
+        const prestamos = await sql.query`
+    SELECT SUM(monto) as total
+    FROM CajaMovimientos
+    WHERE tipo = 'prestamo'
+    AND mes = ${mes} AND anio = ${anio}
+`;
 
         // ➕ ingresos manuales
         const ingresosExtra = await sql.query`
@@ -852,7 +858,10 @@ app.get('/finanzas', auth, async (req, res) => {
 
         const egresosTotales = egresos.recordset[0].total || 0;
 
-        const cajaTotal = ingresosTotales - egresosTotales;
+        const cajaTotal =
+    ingresosTotales -
+    egresosTotales -
+    (prestamos.recordset[0].total || 0);
 
         res.render('finanzas', {
             ingresos: ingresosTotales,
@@ -896,6 +905,44 @@ app.post('/finanzas/movimiento', auth, async (req, res) => {
     } catch (err) {
         console.log("🔥 ERROR FINANZAS MOVIMIENTO:", err);
         res.status(500).send('Error interno en finanzas');
+    }
+});
+app.get('/deudores', auth, async (req, res) => {
+    try {
+
+        const deudores = await sql.query`
+            SELECT *
+            FROM CajaMovimientos
+            WHERE tipo = 'prestamo'
+            ORDER BY fecha DESC
+        `;
+
+        res.render('deudores', {
+            deudores: deudores.recordset
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('Error deudores');
+    }
+});
+app.post('/deudores/agregar', auth, async (req, res) => {
+    try {
+
+        const { concepto, monto, mes, anio } = req.body;
+
+        await sql.query`
+            INSERT INTO CajaMovimientos
+            (tipo, concepto, monto, mes, anio, usuario, referencia)
+            VALUES
+            ('prestamo', ${concepto}, ${Number(monto)}, ${mes}, ${anio}, ${req.session.usuario}, 'deudor')
+        `;
+
+        res.redirect('/deudores');
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('Error prestamo');
     }
 });
 // =====================
