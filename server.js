@@ -817,7 +817,7 @@ app.get('/finanzas', auth, async (req, res) => {
             FROM Pas
             WHERE mes = ${mes} AND anio = ${anio}
         `;
-      const prestamos = await sql.query`
+const prestamos = await sql.query`
     SELECT SUM(monto) as total
     FROM CajaMovimientos
     WHERE tipo = 'prestamo'
@@ -830,8 +830,6 @@ const pagosPrestamos = await sql.query`
     WHERE tipo = 'pago_prestamo'
     AND mes = ${mes} AND anio = ${anio}
 `;
-`;
-
         // ➕ ingresos manuales
         const ingresosExtra = await sql.query`
             SELECT SUM(monto) as total
@@ -874,7 +872,7 @@ const pagosPrestamos = await sql.query`
         res.render('finanzas', {
     ingresos: ingresosTotales,
     egresos: egresosTotales,
-    deuda: deudaReal,
+    deuda: deuda.recordset[0].total || 0,
     cajaTotal,
     movimientos: movimientos.recordset || [],
     mes,
@@ -921,28 +919,26 @@ app.get('/deudores', auth, async (req, res) => {
         const mes = Number(req.query.mes) || new Date().getMonth() + 1;
         const anio = Number(req.query.anio) || new Date().getFullYear();
 
-        const pool = await sql.connect(config);
+        const prestamos = await sql.query`
+            SELECT *
+            FROM CajaMovimientos
+            WHERE tipo = 'prestamo'
+            AND mes = ${mes}
+            AND anio = ${anio}
+            ORDER BY fecha DESC
+        `;
 
-const prestamos = await pool.request().query(`
-    SELECT *
-    FROM CajaMovimientos
-    WHERE tipo = 'prestamo'
-    AND mes = ${mes}
-    AND anio = ${anio}
-    ORDER BY fecha DESC
-`);
+        const totalResult = await sql.query`
+            SELECT ISNULL(SUM(monto), 0) as total
+            FROM CajaMovimientos
+            WHERE tipo = 'prestamo'
+            AND mes = ${mes}
+            AND anio = ${anio}
+        `;
 
-const totalResult = await pool.request().query(`
-    SELECT ISNULL(SUM(monto), 0) as total
-    FROM CajaMovimientos
-    WHERE tipo = 'prestamo'
-    AND mes = ${mes}
-    AND anio = ${anio}
-`);
+        const total = totalResult.recordset[0].total || 0;
 
-        const total = totalResult.recordset[0].total;
-
-        return res.render('deudores', {
+        res.render('deudores', {
             prestamos: prestamos.recordset || [],
             total,
             mes,
@@ -951,7 +947,7 @@ const totalResult = await pool.request().query(`
 
     } catch (err) {
         console.log("ERROR DEUDORES:", err);
-        return res.status(500).send("Error deudores");
+        res.status(500).send("Error deudores");
     }
 });
 app.post('/deudores/pagar', auth, async (req, res) => {
@@ -1053,4 +1049,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log('Servidor en puerto ' + PORT);
 });
-
