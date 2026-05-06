@@ -910,20 +910,36 @@ app.post('/finanzas/movimiento', auth, async (req, res) => {
 app.get('/deudores', auth, async (req, res) => {
     try {
 
-        const deudores = await sql.query`
+        const mes = Number(req.query.mes) || new Date().getMonth() + 1;
+        const anio = Number(req.query.anio) || new Date().getFullYear();
+
+        const prestamos = await sql.query`
             SELECT *
             FROM CajaMovimientos
             WHERE tipo = 'prestamo'
+            AND mes = ${mes}
+            AND anio = ${anio}
             ORDER BY fecha DESC
         `;
 
+        const total = await sql.query`
+            SELECT SUM(monto) as total
+            FROM CajaMovimientos
+            WHERE tipo = 'prestamo'
+            AND mes = ${mes}
+            AND anio = ${anio}
+        `;
+
         res.render('deudores', {
-            deudores: deudores.recordset
+            prestamos: prestamos.recordset || [],
+            total: total.recordset[0].total || 0,
+            mes,
+            anio
         });
 
     } catch (err) {
-        console.log(err);
-        res.status(500).send('Error deudores');
+        console.log("ERROR DEUDORES:", err);
+        res.status(500).send("Error deudores");
     }
 });
 app.post('/deudores/agregar', auth, async (req, res) => {
@@ -931,18 +947,67 @@ app.post('/deudores/agregar', auth, async (req, res) => {
 
         const { concepto, monto, mes, anio } = req.body;
 
+        if (!concepto || !monto || !mes || !anio) {
+            return res.send("Faltan datos");
+        }
+
         await sql.query`
             INSERT INTO CajaMovimientos
-            (tipo, concepto, monto, mes, anio, usuario, referencia)
+            (tipo, concepto, monto, mes, anio, usuario)
             VALUES
-            ('prestamo', ${concepto}, ${Number(monto)}, ${mes}, ${anio}, ${req.session.usuario}, 'deudor')
+            ('prestamo', ${concepto}, ${Number(monto)}, ${Number(mes)}, ${Number(anio)}, ${req.session.usuario})
         `;
 
-        res.redirect('/deudores');
+        res.redirect(`/deudores?mes=${mes}&anio=${anio}`);
+
+    } catch (err) {
+        console.log("ERROR PRESTAMO:", err);
+        res.status(500).send("Error");
+    }
+});
+app.get('/egresos', auth, async (req, res) => {
+    try {
+
+        const data = await sql.query`
+            SELECT *
+            FROM CajaMovimientos
+            WHERE tipo = 'egreso'
+            ORDER BY fecha DESC
+        `;
+
+        const total = await sql.query`
+            SELECT SUM(monto) as total
+            FROM CajaMovimientos
+            WHERE tipo = 'egreso'
+        `;
+
+        res.render('egresos', {
+            movimientos: data.recordset || [],
+            total: total.recordset[0].total || 0
+        });
 
     } catch (err) {
         console.log(err);
-        res.status(500).send('Error prestamo');
+        res.status(500).send('Error egresos');
+    }
+});
+app.post('/egresos/agregar', auth, async (req, res) => {
+    try {
+
+        const { concepto, monto, mes, anio } = req.body;
+
+        await sql.query`
+            INSERT INTO CajaMovimientos
+            (tipo, concepto, monto, mes, anio, usuario)
+            VALUES
+            ('egreso', ${concepto}, ${monto}, ${mes}, ${anio}, ${req.session.usuario})
+        `;
+
+        res.redirect('/egresos');
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('Error egresos');
     }
 });
 // =====================

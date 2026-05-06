@@ -1,0 +1,95 @@
+<%- include('partials/navbar') %>
+
+<style>
+body {
+    background: #0b1220;
+    color: white;
+    font-family: Arial;
+}
+
+.container {
+    padding: 20px;
+}
+
+.card {
+    background: #111827;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.total {
+    font-size: 28px;
+    color: #fbbf24;
+    font-weight: bold;
+}
+
+.mov {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #1f2937;
+}
+
+input, button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    background: #fbbf24;
+    color: black;
+    cursor: pointer;
+}
+</style>
+
+<div class="container">
+
+<h2>🤝 DEUDORES / PRÉSTAMOS</h2>
+
+<!-- TOTAL -->
+<div class="card">
+    <h3>Total prestado</h3>
+    <div class="total">S/ <%= total %></div>
+</div>
+
+<!-- FORM -->
+<div class="card">
+    <h3>Registrar préstamo</h3>
+
+    <form method="POST" action="/deudores/agregar">
+
+        <input type="text" name="concepto" placeholder="Nombre de persona o motivo" required>
+
+        <input type="number" name="monto" placeholder="Monto prestado" required>
+
+        <input type="number" name="mes" value="<%= mes %>" required>
+
+        <input type="number" name="anio" value="<%= anio %>" required>
+
+        <button type="submit">Registrar préstamo</button>
+    </form>
+</div>
+
+<!-- LISTA -->
+<div class="card">
+    <h3>Historial</h3>
+
+    <% prestamos.forEach(p => { %>
+        <div class="mov">
+            <div>
+                <b><%= p.concepto %></b><br>
+                <small><%= p.usuario %> - <%= new Date(p.fecha).toLocaleString() %></small>
+            </div>
+
+            <div style="color:#fbbf24">
+                - S/ <%= p.monto %>
+            </div>
+        </div>
+    <% }) %>
+
+</div>
+
+</div>

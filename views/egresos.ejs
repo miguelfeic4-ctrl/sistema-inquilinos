@@ -1,0 +1,96 @@
+<%- include('partials/navbar') %>
+
+<link rel="stylesheet" href="/styles.css">
+
+<style>
+body {
+    background: #0b1220;
+    color: white;
+    font-family: Arial;
+}
+
+.container {
+    padding: 20px;
+}
+
+.card {
+    background: #111827;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.total {
+    font-size: 28px;
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.mov {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #1f2937;
+}
+
+input, button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    background: #ef4444;
+    color: white;
+    cursor: pointer;
+}
+</style>
+
+<div class="container">
+
+<h2>💸 EGRESOS</h2>
+
+<div class="card">
+    <h3>Total egresos</h3>
+    <div class="total">S/ <%= total %></div>
+</div>
+
+<!-- FORMULARIO -->
+<div class="card">
+    <h3>Registrar egreso</h3>
+
+    <form method="POST" action="/egresos/agregar">
+
+        <input type="text" name="concepto" placeholder="Ej: Luz / Agua / Internet" required>
+
+        <input type="number" name="monto" placeholder="Monto" required>
+
+        <input type="number" name="mes" value="<%= mes %>" required>
+
+        <input type="number" name="anio" value="<%= anio %>" required>
+
+        <button type="submit">Registrar egreso</button>
+    </form>
+</div>
+
+<!-- LISTA -->
+<div class="card">
+    <h3>Historial</h3>
+
+    <% movimientos.forEach(m => { %>
+        <div class="mov">
+            <div>
+                <b><%= m.concepto %></b><br>
+                <small><%= m.usuario %></small>
+            </div>
+
+            <div style="color:#ef4444">
+                - S/ <%= m.monto %>
+            </div>
+        </div>
+    <% }) %>
+
+</div>
+
+</div>
