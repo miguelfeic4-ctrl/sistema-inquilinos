@@ -512,22 +512,26 @@ app.post('/pagos/registrar', async (req, res) => {
 // 📋 REPORTE INQUILINOS
 // =====================
 app.get('/reportes/inquilinos', async (req, res) => {
-    try {
 
-        const result = await sql.query`
-            SELECT *
-            FROM Inquilinos
-            ORDER BY nombreCompleto ASC
-        `;
+    const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
+    const anio = Number(req.query.anio) || new Date().getFullYear();
 
-        res.render('reporte_inquilinos', {
-            data: result.recordset
-        });
+    const fechaFiltro = new Date(anio, mes - 1, 1);
 
-    } catch (err) {
-        console.log('🔥 ERROR REPORTE INQUILINOS:', err);
-        res.send('Error reporte inquilinos');
-    }
+    const result = await sql.query`
+        SELECT * FROM Inquilinos
+    `;
+
+    const data = result.recordset.filter(i => {
+        const ingreso = new Date(i.fechaIngreso);
+        return ingreso <= fechaFiltro && i.estado !== 'retirado';
+    });
+
+    res.render('reportes_inquilinos', {
+        data,
+        mes,
+        anio
+    });
 });
 
 app.get('/reportes', auth, (req, res) => {

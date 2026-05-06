@@ -97,6 +97,23 @@
 <div class="container">
 
 <h1>📋 Reporte de Inquilinos</h1>
+<form method="GET" style="display:flex;gap:10px;margin-bottom:15px;">
+
+    <select name="mes">
+        <% const meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+        "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]; %>
+
+        <% meses.forEach((m, i) => { %>
+            <option value="<%= i+1 %>" <%= mes == i+1 ? 'selected' : '' %>>
+                <%= m %>
+            </option>
+        <% }) %>
+    </select>
+
+    <input type="number" name="anio" value="<%= anio %>">
+
+    <button type="submit">Filtrar</button>
+</form>
 
 <table>
     <tr>
