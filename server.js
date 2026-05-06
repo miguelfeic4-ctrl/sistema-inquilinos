@@ -853,6 +853,16 @@ app.get('/finanzas', auth, async (req, res) => {
             WHERE MONTH(fecha) = ${mes} AND YEAR(fecha) = ${anio}
         `;
 
+        const deudaResult = await sql.query`
+    SELECT 
+        ISNULL(SUM(CASE WHEN tipo = 'prestamo' THEN monto ELSE 0 END),0) -
+        ISNULL(SUM(CASE WHEN tipo = 'pago_prestamo' THEN monto ELSE 0 END),0)
+        AS total
+    FROM CajaMovimientos
+`;
+
+const deuda = deudaResult.recordset?.[0]?.total || 0;
+
         const egresos = egresosResult.recordset?.[0]?.total || 0;
 
         // 🧠 deuda real
@@ -958,17 +968,17 @@ app.get('/deudores', auth, async (req, res) => {
         const mes = Number(req.query.mes) || new Date().getMonth() + 1;
         const anio = Number(req.query.anio) || new Date().getFullYear();
 
-        // préstamos
+        // 🔥 AGRUPAMOS PRÉSTAMOS POR PERSONA
         const prestamos = await sql.query`
-            SELECT *
+            SELECT concepto, SUM(monto) as prestado
             FROM CajaMovimientos
             WHERE tipo = 'prestamo'
             AND mes = ${mes}
             AND anio = ${anio}
-            ORDER BY fecha DESC
+            GROUP BY concepto
         `;
 
-        // pagos de préstamos
+        // 🔥 PAGOS POR PERSONA
         const pagos = await sql.query`
             SELECT concepto, SUM(monto) as pagado
             FROM CajaMovimientos
@@ -978,25 +988,33 @@ app.get('/deudores', auth, async (req, res) => {
             GROUP BY concepto
         `;
 
+        // 🧠 MAPA DE PAGOS
         const mapaPagos = {};
         pagos.recordset.forEach(p => {
-            mapaPagos[p.concepto] = p.pagado;
+            mapaPagos[p.concepto] = p.pagado || 0;
         });
 
+        // 🔥 CALCULAR SALDO REAL
         const prestamosConSaldo = prestamos.recordset.map(p => {
             const pagado = mapaPagos[p.concepto] || 0;
+            const saldo = (p.prestado || 0) - pagado;
 
             return {
-                ...p,
+                concepto: p.concepto,
+                monto: p.prestado || 0,
                 pagado,
-                saldo: p.monto - pagado
+                saldo
             };
         });
 
-        const total = prestamosConSaldo.reduce((s, p) => s + p.saldo, 0);
+        // 🔥 SOLO DEUDORES ACTIVOS (AQUÍ ESTÁ LA MAGIA)
+        const deudoresActivos = prestamosConSaldo.filter(p => p.saldo > 0);
+
+        // 🔥 TOTAL REAL
+        const total = deudoresActivos.reduce((s, p) => s + p.saldo, 0);
 
         res.render('deudores', {
-            prestamos: prestamosConSaldo,
+            prestamos: deudoresActivos,
             total,
             mes,
             anio

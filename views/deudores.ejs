@@ -55,6 +55,11 @@ button {
     <div class="total">S/ <%= total %></div>
 </div>
 
+<form method="POST" action="/deudores/eliminar">
+    <input type="hidden" name="concepto" value="<%= p.concepto %>">
+    <button style="background:#ef4444;color:white;">Eliminar</button>
+</form>
+
 <!-- ➕ REGISTRAR PRÉSTAMO -->
 <div class="card">
     <h3>Registrar préstamo</h3>
