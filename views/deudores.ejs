@@ -27,6 +27,7 @@ body {
 .mov {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 10px;
     border-bottom: 1px solid #1f2937;
 }
@@ -43,6 +44,14 @@ button {
     color: black;
     cursor: pointer;
 }
+
+.btn-eliminar {
+    background: #ef4444;
+    color: white;
+    padding: 6px 10px;
+    font-size: 12px;
+    margin-top: 5px;
+}
 </style>
 
 <div class="container">
@@ -52,13 +61,8 @@ button {
 <!-- 💰 TOTAL -->
 <div class="card">
     <h3>Total prestado</h3>
-    <div class="total">S/ <%= total %></div>
+    <div class="total">S/ <%= total || 0 %></div>
 </div>
-
-<form method="POST" action="/deudores/eliminar">
-    <input type="hidden" name="concepto" value="<%= p.concepto %>">
-    <button style="background:#ef4444;color:white;">Eliminar</button>
-</form>
 
 <!-- ➕ REGISTRAR PRÉSTAMO -->
 <div class="card">
@@ -70,7 +74,6 @@ button {
 
         <input type="number" name="monto" placeholder="Monto prestado" required>
 
-        <!-- 📅 NUEVO: FECHA REAL -->
         <input type="date" name="fecha" required>
 
         <input type="number" name="mes" value="<%= mes %>" required>
@@ -81,7 +84,7 @@ button {
     </form>
 </div>
 
-<!-- 💸 PAGAR DEUDA (NUEVO BLOQUE) -->
+<!-- 💸 PAGAR DEUDA -->
 <div class="card">
     <h3>💸 Registrar pago de deuda</h3>
 
@@ -101,32 +104,45 @@ button {
     </form>
 </div>
 
-<!-- 📊 HISTORIAL COMPLETO -->
+<!-- 📊 HISTORIAL -->
 <div class="card">
-    <h3>📊 Historial de movimientos</h3>
+    <h3>📊 Historial de deudores</h3>
 
-    <% prestamos.forEach(p => { %>
+    <% if (!prestamos || prestamos.length === 0) { %>
+        <p style="color:#9ca3af;">No hay deudores activos</p>
+    <% } else { %>
 
-    <div class="mov">
+        <% prestamos.forEach(p => { %>
 
-        <div>
-            <b><%= p.concepto %></b><br>
+            <div class="mov">
 
-            <small>
-                <%= new Date(p.fecha).toLocaleString() %>
-            </small>
+                <div>
+                    <b><%= p.concepto %></b><br>
 
-        </div>
+                    <small>
+                        <%= p.fecha ? new Date(p.fecha).toLocaleString() : '' %>
+                    </small>
+                </div>
 
-        <div>
-            Monto: S/ <%= p.monto %><br>
-            Pagado: S/ <%= p.pagado %><br>
-            Saldo: S/ <%= p.saldo %>
-        </div>
+                <div>
+                    Monto: S/ <%= p.monto || 0 %><br>
+                    Pagado: S/ <%= p.pagado || 0 %><br>
+                    <b>Saldo: S/ <%= p.saldo || 0 %></b>
 
-    </div>
+                    <!-- 🔥 BOTÓN SOLO SI YA PAGÓ TODO -->
+                    <% if (p.saldo <= 0) { %>
+                        <form method="POST" action="/deudores/eliminar">
+                            <input type="hidden" name="concepto" value="<%= p.concepto %>">
+                            <button class="btn-eliminar">Eliminar</button>
+                        </form>
+                    <% } %>
+                </div>
 
-<% }) %>
+            </div>
+
+        <% }) %>
+
+    <% } %>
 
 </div>
 
