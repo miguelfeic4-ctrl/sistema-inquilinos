@@ -1046,30 +1046,21 @@ app.post('/deudores/agregar', auth, async (req, res) => {
         res.status(500).send("Error");
     }
 });
-app.get('/egresos', auth, async (req, res) => {
+app.post('/egresos', auth, async (req, res) => {
     try {
 
-        const data = await sql.query`
-            SELECT *
-            FROM CajaMovimientos
-            WHERE tipo = 'egreso'
-            ORDER BY fecha DESC
+        const { concepto, fecha, monto } = req.body;
+
+        await sql.query`
+            INSERT INTO Egresos (concepto, monto, fecha)
+            VALUES (${concepto}, ${monto}, ${fecha})
         `;
 
-        const total = await sql.query`
-            SELECT SUM(monto) as total
-            FROM CajaMovimientos
-            WHERE tipo = 'egreso'
-        `;
-
-        res.render('egresos', {
-            movimientos: data.recordset || [],
-            total: total.recordset[0].total || 0
-        });
+        res.redirect('/egresos');
 
     } catch (err) {
         console.log(err);
-        res.status(500).send('Error egresos');
+        res.send('Error al guardar egreso');
     }
 });
 app.post('/egresos/agregar', auth, async (req, res) => {

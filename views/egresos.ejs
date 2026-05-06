@@ -51,12 +51,22 @@ button {
 
 <h2>💸 EGRESOS</h2>
 
+<!-- 🔹 SELECTOR DE MES -->
 <div class="card">
-    <h3>Total egresos</h3>
+    <form method="GET" action="/egresos">
+        <label>Seleccionar mes:</label>
+        <input type="month" name="mes" value="<%= mesSeleccionado %>">
+        <button type="submit">Ver</button>
+    </form>
+</div>
+
+<!-- 🔹 TOTAL -->
+<div class="card">
+    <h3>Total egresos del mes</h3>
     <div class="total">S/ <%= total %></div>
 </div>
 
-<!-- FORMULARIO -->
+<!-- 🔹 FORMULARIO -->
 <div class="card">
     <h3>Registrar egreso</h3>
 
@@ -66,23 +76,28 @@ button {
 
         <input type="number" name="monto" placeholder="Monto" required>
 
-        <input type="number" name="mes" value="<%= mes %>" required>
-
-        <input type="number" name="anio" value="<%= anio %>" required>
+        <!-- 🔥 CAMBIO IMPORTANTE: FECHA REAL -->
+        <input type="date" name="fecha" required>
 
         <button type="submit">Registrar egreso</button>
     </form>
 </div>
 
-<!-- LISTA -->
+<!-- 🔹 LISTA -->
 <div class="card">
     <h3>Historial</h3>
+
+    <% if (movimientos.length === 0) { %>
+        <p style="color:#9ca3af;">No hay egresos en este mes</p>
+    <% } %>
 
     <% movimientos.forEach(m => { %>
         <div class="mov">
             <div>
                 <b><%= m.concepto %></b><br>
-                <small><%= m.usuario %></small>
+                <small>
+                    <%= new Date(m.fecha).toLocaleDateString() %>
+                </small>
             </div>
 
             <div style="color:#ef4444">
