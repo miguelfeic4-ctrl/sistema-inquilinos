@@ -921,33 +921,37 @@ app.get('/deudores', auth, async (req, res) => {
         const mes = Number(req.query.mes) || new Date().getMonth() + 1;
         const anio = Number(req.query.anio) || new Date().getFullYear();
 
-        const prestamos = await sql.query`
-            SELECT *
-            FROM CajaMovimientos
-            WHERE tipo = 'prestamo'
-            AND mes = ${mes}
-            AND anio = ${anio}
-            ORDER BY fecha DESC
-        `;
+        const pool = await sql.connect(config);
 
-        const total = await sql.query`
-            SELECT SUM(monto) as total
-            FROM CajaMovimientos
-            WHERE tipo = 'prestamo'
-            AND mes = ${mes}
-            AND anio = ${anio}
-        `;
+const prestamos = await pool.request().query(`
+    SELECT *
+    FROM CajaMovimientos
+    WHERE tipo = 'prestamo'
+    AND mes = ${mes}
+    AND anio = ${anio}
+    ORDER BY fecha DESC
+`);
 
-        res.render('deudores', {
+const totalResult = await pool.request().query(`
+    SELECT ISNULL(SUM(monto), 0) as total
+    FROM CajaMovimientos
+    WHERE tipo = 'prestamo'
+    AND mes = ${mes}
+    AND anio = ${anio}
+`);
+
+        const total = totalResult.recordset[0].total;
+
+        return res.render('deudores', {
             prestamos: prestamos.recordset || [],
-            total: total.recordset[0].total || 0,
+            total,
             mes,
             anio
         });
 
     } catch (err) {
         console.log("ERROR DEUDORES:", err);
-        res.status(500).send("Error deudores");
+        return res.status(500).send("Error deudores");
     }
 });
 app.post('/deudores/pagar', auth, async (req, res) => {
