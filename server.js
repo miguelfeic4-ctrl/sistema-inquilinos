@@ -817,11 +817,19 @@ app.get('/finanzas', auth, async (req, res) => {
             FROM Pas
             WHERE mes = ${mes} AND anio = ${anio}
         `;
-        const prestamos = await sql.query`
+      const prestamos = await sql.query`
     SELECT SUM(monto) as total
     FROM CajaMovimientos
     WHERE tipo = 'prestamo'
     AND mes = ${mes} AND anio = ${anio}
+`;
+
+const pagosPrestamos = await sql.query`
+    SELECT SUM(monto) as total
+    FROM CajaMovimientos
+    WHERE tipo = 'pago_prestamo'
+    AND mes = ${mes} AND anio = ${anio}
+`;
 `;
 
         // ➕ ingresos manuales
@@ -864,14 +872,14 @@ app.get('/finanzas', auth, async (req, res) => {
     (prestamos.recordset[0].total || 0);
 
         res.render('finanzas', {
-            ingresos: ingresosTotales,
-            egresos: egresosTotales,
-            deuda: deuda.recordset[0].total || 0,
-            cajaTotal,
-            movimientos: movimientos.recordset || [],
-            mes,
-            anio
-        });
+    ingresos: ingresosTotales,
+    egresos: egresosTotales,
+    deuda: deudaReal,
+    cajaTotal,
+    movimientos: movimientos.recordset || [],
+    mes,
+    anio
+});
 
     } catch (err) {
         console.log("❌ ERROR FINANZAS:", err);
@@ -945,17 +953,17 @@ app.get('/deudores', auth, async (req, res) => {
 app.post('/deudores/pagar', auth, async (req, res) => {
     try {
 
-        const { concepto, monto } = req.body;
+        const { concepto, monto, mes, anio, fecha } = req.body;
 
-        const fecha = new Date();
-        const mes = fecha.getMonth() + 1;
-        const anio = fecha.getFullYear();
+        const d = new Date(fecha || new Date());
+        const m = d.getMonth() + 1;
+        const a = d.getFullYear();
 
         await sql.query`
             INSERT INTO CajaMovimientos
             (tipo, concepto, monto, mes, anio, usuario, referencia)
             VALUES
-            ('ingreso', ${concepto + ' - pago deuda'}, ${Number(monto)}, ${mes}, ${anio}, ${req.session.usuario}, 'deudor_pago')
+            ('pago_prestamo', ${concepto}, ${Number(monto)}, ${m}, ${a}, ${req.session.usuario}, 'deudor')
         `;
 
         res.redirect('/deudores');
