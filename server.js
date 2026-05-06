@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const ExcelJS = require('exceljs');
 const session = require('express-session');
-
+const sql = require('mssql');
 const app = express();
 
 // =====================
@@ -23,7 +23,7 @@ app.use(session({
 // =====================
 // 🔥 SQL
 // =====================
-const sql = require('mssql');
+
 
 const config = {
   user: process.env.DB_USER,
@@ -90,15 +90,6 @@ function auth(req, res, next) {
 // 🔐 LOGIN
 // =====================
 app.get('/login', (req, res) => res.render('login'));
-
-async function connectDB() {
-  try {
-    pool = await sql.connect(config);
-    console.log("✅ Conectado a Azure SQL");
-  } catch (err) {
-    console.log("❌ Error conexión:", err);
-  }
-}
 
 connectDB();
 app.post('/login', async (req, res) => {
@@ -511,29 +502,32 @@ app.post('/pagos/registrar', async (req, res) => {
 // =====================
 // 📋 REPORTE INQUILINOS
 // =====================
-app.get('/reportes/inquilinos', async (req, res) => {
+app.get('/reportes/inquilinos', auth, async (req, res) => {
 
     const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
     const anio = Number(req.query.anio) || new Date().getFullYear();
 
     const fechaFiltro = new Date(anio, mes - 1, 1);
 
-    const result = await sql.query`
-        SELECT * FROM Inquilinos
-    `;
+    const result = await sql.query`SELECT * FROM Inquilinos`;
 
     const data = result.recordset.filter(i => {
 
-    const ingreso = new Date(i.fechaIngreso);
-    const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
+        const ingreso = new Date(i.fechaIngreso);
+        const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
 
-    const fechaFiltro = new Date(anio, mes - 1, 1);
+        const activoEnEseMes =
+            ingreso <= fechaFiltro &&
+            (!salida || salida >= fechaFiltro);
 
-    const activoEnEseMes =
-        ingreso <= fechaFiltro &&
-        (!salida || salida >= fechaFiltro);
+        return activoEnEseMes && i.estado !== 'retirado';
+    });
 
-    return activoEnEseMes && i.estado !== 'retirado';
+    res.render('reporte_inquilinos', {
+        data,
+        mes,
+        anio
+    });
 });
 
 res.render('reporte_inquilinos', {
@@ -541,7 +535,7 @@ res.render('reporte_inquilinos', {
     mes,
     anio
 });
-});
+
 
 app.get('/reportes', auth, async (req, res) => {
     const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
@@ -574,13 +568,18 @@ app.get('/reportes', auth, async (req, res) => {
 app.get('/reportes/pagos', auth, async (req, res) => {
     try {
 
+        const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
+        const anio = Number(req.query.anio) || new Date().getFullYear();
+
         const inquilinos = await sql.query`
             SELECT id, nombreCompleto, precio
             FROM Inquilinos
+            WHERE estado != 'retirado'
         `;
 
         const pagos = await sql.query`
             SELECT * FROM Pas
+            WHERE mes = ${mes} AND anio = ${anio}
         `;
 
         let total = 0;
@@ -592,25 +591,27 @@ app.get('/reportes/pagos', auth, async (req, res) => {
                 .filter(p => p.inquilinoId === i.id)
                 .reduce((s, p) => s + Number(p.monto || 0), 0);
 
-            total += Number(i.precio || 0);
+            const precio = Number(i.precio || 0);
+
+            total += precio;
             pagado += monto;
 
             return {
                 nombre: i.nombreCompleto,
-                precio: i.precio || 0,
+                precio,
                 pago: monto,
-                estado: monto >= (i.precio || 0) ? 'Pagado' : 'Pendiente'
+                estado: monto >= precio ? 'Pagado' : 'Pendiente'
             };
         });
 
-    res.render('reporte_pagos', {
-    total,
-    pagado,
-    pendiente: total - pagado,
-    detalle,
-    mes,
-    anio
-});
+        res.render('reporte_pagos', {
+            total,
+            pagado,
+            pendiente: total - pagado,
+            detalle,
+            mes,
+            anio
+        });
 
     } catch (err) {
         console.log('ERROR PAGOS:', err);
@@ -622,9 +623,8 @@ app.get('/reportes/pagos', auth, async (req, res) => {
 // =====================
 app.get('/reportes/inquilinos/excel', async (req, res) => {
 
-    const mes = Number(req.query.mes);
-    const anio = Number(req.query.anio);
-
+  const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
+const anio = Number(req.query.anio) || new Date().getFullYear();
     const fechaFiltro = new Date(anio, mes - 1, 1);
 
     const result = await sql.query`SELECT * FROM Inquilinos`;
@@ -678,8 +678,9 @@ app.get('/reportes/pagos/excel', auth, async (req, res) => {
     ];
 
     const result = await sql.query`
-        SELECT * FROM Pas
-    `;
+    SELECT * FROM Pas
+    WHERE mes = ${mes} AND anio = ${anio}
+`;
 
     result.recordset.forEach(p => {
         sheet.addRow({
