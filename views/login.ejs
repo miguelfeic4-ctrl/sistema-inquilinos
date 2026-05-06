@@ -8,17 +8,48 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-
             background: #0b1220;
+            overflow: hidden;
         }
 
         /* =========================
-           LOGIN BOX GLASS NEON
+           🌐 GRID CYBER BACKGROUND
+        ========================= */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image:
+                linear-gradient(rgba(56,189,248,0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56,189,248,0.08) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: moveGrid 12s linear infinite;
+            z-index: 0;
+            transform: rotate(15deg);
+        }
+
+        @keyframes moveGrid {
+            from { transform: translate(0,0) rotate(15deg); }
+            to { transform: translate(-60px,-60px) rotate(15deg); }
+        }
+
+        /* =========================
+           🌌 CANVAS PARTICULAS
+        ========================= */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* =========================
+           LOGIN BOX
         ========================= */
         .login-box {
             width: 320px;
@@ -29,13 +60,16 @@
             background: rgba(255,255,255,0.04);
             backdrop-filter: blur(14px);
 
-            border: 1px solid rgba(56,189,248,0.2);
+            border: 1px solid rgba(56,189,248,0.25);
 
             box-shadow: 0 0 25px rgba(56,189,248,0.15);
 
             text-align: center;
 
             animation: fadeIn 0.5s ease;
+
+            position: relative;
+            z-index: 2;
         }
 
         @keyframes fadeIn {
@@ -43,17 +77,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* =========================
-           TITULO
-        ========================= */
-        .login-box h2 {
+        h2 {
             color: #38bdf8;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
-        /* =========================
-           INPUTS
-        ========================= */
         input {
             width: 100%;
             padding: 10px;
@@ -65,10 +93,10 @@
             background: rgba(0,0,0,0.25);
             color: white;
 
-            outline: none;
             text-align: center;
+            outline: none;
 
-            transition: 0.2s;
+            box-sizing: border-box;
         }
 
         input:focus {
@@ -76,13 +104,9 @@
             box-shadow: 0 0 10px rgba(56,189,248,0.3);
         }
 
-        /* =========================
-           BOTON
-        ========================= */
         button {
             width: 100%;
             padding: 10px;
-
             margin-top: 10px;
 
             border-radius: 10px;
@@ -94,7 +118,6 @@
             color: white;
 
             font-weight: bold;
-
             transition: 0.2s;
         }
 
@@ -103,11 +126,8 @@
             box-shadow: 0 0 15px rgba(56,189,248,0.3);
         }
 
-        /* =========================
-           MINI FOOTER (OPCIONAL PRO)
-        ========================= */
         .login-box::after {
-            content: "Sistema de Inquilinos";
+            content: "mikesistem1.0";
             display: block;
             margin-top: 15px;
             font-size: 11px;
@@ -118,6 +138,9 @@
 
 <body>
 
+<!-- 🌌 PARTICULAS -->
+<canvas id="particles"></canvas>
+
 <div class="login-box">
 
     <h2>🔐 Acceso al Sistema</h2>
@@ -125,7 +148,6 @@
     <form method="POST" action="/login">
 
         <input type="text" name="usuario" placeholder="Usuario" required>
-
         <input type="password" name="password" placeholder="Contraseña" required>
 
         <button type="submit">Ingresar</button>
@@ -133,6 +155,52 @@
     </form>
 
 </div>
+
+<script>
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+for (let i = 0; i < 80; i++) {
+    particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2,
+        dx: (Math.random() - 0.5) * 0.5,
+        dy: (Math.random() - 0.5) * 0.5
+    });
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(56,189,248,0.7)";
+        ctx.fill();
+
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+    }
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
 
 </body>
 </html>
