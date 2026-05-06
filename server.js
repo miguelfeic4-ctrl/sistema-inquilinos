@@ -935,15 +935,13 @@ app.post('/finanzas/movimiento', auth, async (req, res) => {
 app.post('/finanzas/reset-caja', auth, async (req, res) => {
     try {
 
-        await sql.query`
-            UPDATE Pagos
-            SET estadoCaja = 'cerrado'
-        `;
+        // NO TOCAS BD
+        // solo reinicias lógica si tienes variable o filtro
 
         res.redirect('/finanzas');
 
     } catch (err) {
-        console.log(err);
+        console.log('ERROR REAL:', err);
         res.send('Error al reiniciar caja');
     }
 });
