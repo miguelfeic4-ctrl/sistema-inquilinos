@@ -817,14 +817,14 @@ app.get('/finanzas', auth, async (req, res) => {
 
         // 💰 pagos inquilinos
         const pagos = await sql.query`
-            SELECT SUM(monto) as total
+            SELECT ISNULL(SUM(monto), 0) as total
             FROM Pas
             WHERE mes = ${mes} AND anio = ${anio}
         `;
 
         // 💰 préstamos
         const prestamos = await sql.query`
-            SELECT SUM(monto) as total
+            SELECT ISNULL(SUM(monto), 0) as total
             FROM CajaMovimientos
             WHERE tipo = 'prestamo'
             AND mes = ${mes} AND anio = ${anio}
@@ -832,7 +832,7 @@ app.get('/finanzas', auth, async (req, res) => {
 
         // 💰 pagos de préstamos
         const pagosPrestamos = await sql.query`
-            SELECT SUM(monto) as total
+            SELECT ISNULL(SUM(monto), 0) as total
             FROM CajaMovimientos
             WHERE tipo = 'pago_prestamo'
             AND mes = ${mes} AND anio = ${anio}
@@ -840,35 +840,29 @@ app.get('/finanzas', auth, async (req, res) => {
 
         // ➕ ingresos extra
         const ingresosExtra = await sql.query`
-            SELECT SUM(monto) as total
+            SELECT ISNULL(SUM(monto), 0) as total
             FROM CajaMovimientos
             WHERE tipo='ingreso'
             AND mes = ${mes} AND anio = ${anio}
         `;
 
-        // ➖ egresos
-       
+        // ➖ egresos (AHORA CORRECTO Y UNIFICADO)
+        const egresosResult = await sql.query`
+            SELECT ISNULL(SUM(monto), 0) as total
+            FROM Egresos
+            WHERE MONTH(fecha) = ${mes} AND YEAR(fecha) = ${anio}
+        `;
 
-const mesActual = new Date().toISOString().slice(0,7);
+        const egresos = egresosResult.recordset?.[0]?.total || 0;
 
-const egresosResult = await sql.query`
-    SELECT ISNULL(SUM(monto), 0) as total
-    FROM Egresos
-    WHERE CONVERT(varchar(7), fecha, 120) = ${mesActual}
-`;
-
-const egresos = egresosResult.recordset[0].total;
-
-
-
-        // 🧠 deuda real (inquilinos activos)
+        // 🧠 deuda real
         const deuda = await sql.query`
-            SELECT SUM(precio) as total
+            SELECT ISNULL(SUM(precio), 0) as total
             FROM Inquilinos
             WHERE estado != 'retirado'
         `;
 
-        // 🧾 movimientos con fecha
+        // 🧾 movimientos
         const movimientos = await sql.query`
             SELECT TOP 50
                 tipo,
@@ -882,22 +876,28 @@ const egresos = egresosResult.recordset[0].total;
             ORDER BY fecha DESC
         `;
 
-        const ingresosTotales =
-            (pagos.recordset[0].total || 0) +
-            (ingresosExtra.recordset[0].total || 0);
+        // 🛡️ PROTECCIÓN TOTAL
+        const totalPagos = pagos.recordset?.[0]?.total || 0;
+        const totalPrestamos = prestamos.recordset?.[0]?.total || 0;
+        const totalPagosPrestamos = pagosPrestamos.recordset?.[0]?.total || 0;
+        const totalIngresosExtra = ingresosExtra.recordset?.[0]?.total || 0;
+        const totalDeuda = deuda.recordset?.[0]?.total || 0;
 
-        const egresosTotales = egresos.recordset[0].total || 0;
+        // 📊 CÁLCULOS (RESPETANDO TU LÓGICA)
+        const ingresosTotales = totalPagos + totalIngresosExtra;
+
+        const egresosTotales = egresos; // 🔥 FIX AQUÍ
 
         const cajaTotal =
             ingresosTotales -
             egresosTotales -
-            (prestamos.recordset[0].total || 0) +
-            (pagosPrestamos.recordset[0].total || 0);
+            totalPrestamos +
+            totalPagosPrestamos;
 
         res.render('finanzas', {
             ingresos: ingresosTotales,
             egresos: egresosTotales,
-            deuda: deuda.recordset[0].total || 0,
+            deuda: totalDeuda,
             cajaTotal,
             movimientos: movimientos.recordset || [],
             mes,
