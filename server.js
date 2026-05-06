@@ -935,13 +935,10 @@ app.post('/finanzas/movimiento', auth, async (req, res) => {
 app.post('/finanzas/reset-caja', auth, async (req, res) => {
     try {
 
-        // Opción A: si guardas caja en BD
         await sql.query`
-            UPDATE Caja
-            SET total = 0
+            UPDATE Pagos
+            SET estadoCaja = 'cerrado'
         `;
-
-        // Opción B: si no tienes tabla Caja (te lo adapto si quieres)
 
         res.redirect('/finanzas');
 
