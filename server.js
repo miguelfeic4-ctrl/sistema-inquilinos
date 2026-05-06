@@ -503,31 +503,43 @@ app.post('/pagos/registrar', async (req, res) => {
 // 📋 REPORTE INQUILINOS
 // =====================
 app.get('/reportes/inquilinos', auth, async (req, res) => {
+    try {
 
-    const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
-    const anio = Number(req.query.anio) || new Date().getFullYear();
+        const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
+        const anio = Number(req.query.anio) || new Date().getFullYear();
 
-    const fechaFiltro = new Date(anio, mes - 1, 1);
+        const inicioMes = new Date(anio, mes - 1, 1);
+        const finMes = new Date(anio, mes, 0, 23, 59, 59);
 
-    const result = await sql.query`SELECT * FROM Inquilinos`;
+        const result = await sql.query`
+            SELECT * FROM Inquilinos
+        `;
 
-    const data = result.recordset.filter(i => {
+        const data = result.recordset.filter(i => {
 
-        const ingreso = new Date(i.fechaIngreso);
-        const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
+            const ingreso = i.fechaIngreso ? new Date(i.fechaIngreso) : null;
+            const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
 
-        const activoEnEseMes =
-            ingreso <= fechaFiltro &&
-            (!salida || salida >= fechaFiltro);
+            if (!ingreso) return false;
 
-        return activoEnEseMes && i.estado !== 'retirado';
-    });
+            // 🔥 INTERSECCIÓN DE FECHAS (CORRECTO)
+            const estuvoEnMes =
+                ingreso <= finMes &&
+                (!salida || salida >= inicioMes);
 
-    res.render('reporte_inquilinos', {
-        data,
-        mes,
-        anio
-    });
+            return estuvoEnMes && i.estado !== 'retirado';
+        });
+
+        res.render('reporte_inquilinos', {
+            data,
+            mes,
+            anio
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.send('Error reporte inquilinos');
+    }
 });
 
 app.get('/reportes', auth, async (req, res) => {
@@ -616,20 +628,22 @@ app.get('/reportes/pagos', auth, async (req, res) => {
 // =====================
 app.get('/reportes/inquilinos/excel', async (req, res) => {
 
-  const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
-const anio = Number(req.query.anio) || new Date().getFullYear();
-    const fechaFiltro = new Date(anio, mes - 1, 1);
+  const inicioMes = new Date(anio, mes - 1, 1);
+const finMes = new Date(anio, mes, 0, 23, 59, 59);
 
-    const result = await sql.query`SELECT * FROM Inquilinos`;
+const data = result.recordset.filter(i => {
 
-    const data = result.recordset.filter(i => {
-        const ingreso = new Date(i.fechaIngreso);
-        const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
+    const ingreso = i.fechaIngreso ? new Date(i.fechaIngreso) : null;
+    const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
 
-        return ingreso <= fechaFiltro &&
-              (!salida || salida >= fechaFiltro) &&
-              i.estado !== 'retirado';
-    });
+    if (!ingreso) return false;
+
+    return (
+        ingreso <= finMes &&
+        (!salida || salida >= inicioMes) &&
+        i.estado !== 'retirado'
+    );
+});
 
     const ExcelJS = require('exceljs');
     const workbook = new ExcelJS.Workbook();
