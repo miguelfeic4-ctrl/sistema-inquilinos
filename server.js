@@ -626,50 +626,70 @@ app.get('/reportes/pagos', auth, async (req, res) => {
 // =====================
 // 📥 EXCEL INQUILINOS
 // =====================
-app.get('/reportes/inquilinos/excel', async (req, res) => {
+app.get('/reportes/inquilinos/excel', auth, async (req, res) => {
 
-  const inicioMes = new Date(anio, mes - 1, 1);
-const finMes = new Date(anio, mes, 0, 23, 59, 59);
+    try {
 
-const data = result.recordset.filter(i => {
+        const mes = Number(req.query.mes) || (new Date().getMonth() + 1);
+        const anio = Number(req.query.anio) || new Date().getFullYear();
 
-    const ingreso = i.fechaIngreso ? new Date(i.fechaIngreso) : null;
-    const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
+        const inicioMes = new Date(anio, mes - 1, 1);
+        const finMes = new Date(anio, mes, 0, 23, 59, 59);
 
-    if (!ingreso) return false;
+        const result = await sql.query`SELECT * FROM Inquilinos`;
 
-    return (
-        ingreso <= finMes &&
-        (!salida || salida >= inicioMes) &&
-        i.estado !== 'retirado'
-    );
-});
+        const data = result.recordset.filter(i => {
 
-    const ExcelJS = require('exceljs');
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Inquilinos');
+            const ingreso = i.fechaIngreso ? new Date(i.fechaIngreso) : null;
+            const salida = i.fechaSalida ? new Date(i.fechaSalida) : null;
 
-    sheet.columns = [
-        { header: 'Nombre', key: 'nombre' },
-        { header: 'DNI', key: 'dni' },
-        { header: 'Habitación', key: 'habitacion' },
-        { header: 'Ingreso', key: 'fechaIngreso' }
-    ];
+            if (!ingreso) return false;
 
-    data.forEach(i => sheet.addRow(i));
+            return (
+                ingreso <= finMes &&
+                (!salida || salida >= inicioMes) &&
+                i.estado !== 'retirado'
+            );
+        });
 
-    res.setHeader(
-        'Content-Type',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    );
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Inquilinos');
 
-    res.setHeader(
-        'Content-Disposition',
-        'attachment; filename=inquilinos.xlsx'
-    );
+        sheet.columns = [
+            { header: 'Nombre', key: 'nombreCompleto' },
+            { header: 'DNI', key: 'dni' },
+            { header: 'Teléfono', key: 'telefono' },
+            { header: 'Correo', key: 'correo' },
+            { header: 'Habitación', key: 'habitacion' },
+            { header: 'Ingreso', key: 'fechaIngreso' },
+            { header: 'Garantía', key: 'montoGarantia' },
+            { header: 'Precio', key: 'precio' }
+        ];
 
-    await workbook.xlsx.write(res);
-    res.end();
+        data.forEach(i => {
+            sheet.addRow({
+                ...i,
+                fechaIngreso: i.fechaIngreso ? new Date(i.fechaIngreso) : null
+            });
+        });
+
+        res.setHeader(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+
+        res.setHeader(
+            'Content-Disposition',
+            'attachment; filename=inquilinos.xlsx'
+        );
+
+        await workbook.xlsx.write(res);
+        res.end();
+
+    } catch (err) {
+        console.log("🔥 ERROR EXCEL:", err);
+        res.status(500).send("Error generando Excel");
+    }
 });
 app.get('/reportes/pagos/excel', auth, async (req, res) => {
 
