@@ -804,103 +804,70 @@ app.post('/caja/agregar', auth, async (req, res) => {
 
     res.redirect('/finanzas');
 });
+
 app.get('/finanzas', auth, async (req, res) => {
     try {
 
-        const mes = new Date().getMonth() + 1;
-        const anio = new Date().getFullYear();
+        const mes = Number(req.query.mes) || new Date().getMonth() + 1;
+        const anio = Number(req.query.anio) || new Date().getFullYear();
 
-        const caja = await sql.query`
-            SELECT * FROM Caja
+        // 💰 ingresos por pagos
+        const pagos = await sql.query`
+            SELECT SUM(monto) as total
+            FROM Pas
             WHERE mes = ${mes} AND anio = ${anio}
         `;
 
+        // ➕ ingresos manuales
+        const ingresosExtra = await sql.query`
+            SELECT SUM(monto) as total
+            FROM CajaMovimientos
+            WHERE tipo='ingreso' AND mes = ${mes} AND anio = ${anio}
+        `;
+
+        // ➖ egresos
+        const egresos = await sql.query`
+            SELECT SUM(monto) as total
+            FROM CajaMovimientos
+            WHERE tipo='egreso' AND mes = ${mes} AND anio = ${anio}
+        `;
+
+        // 🧠 deuda total
+        const deuda = await sql.query`
+            SELECT SUM(precio) as total
+            FROM Inquilinos
+            WHERE estado != 'retirado'
+        `;
+
+        // 🧾 movimientos
         const movimientos = await sql.query`
-            SELECT TOP 20 * FROM CajaMovimientos
-            WHERE mes = ${mes} AND anio = ${anio}
+            SELECT TOP 30 *
+            FROM CajaMovimientos
             ORDER BY fecha DESC
         `;
 
-        let ingresos = 0;
-        let egresos = 0;
+        const ingresosTotales =
+            (pagos.recordset[0].total || 0) +
+            (ingresosExtra.recordset[0].total || 0);
 
-        caja.recordset.forEach(c => {
-            if (c.tipo === 'ingreso') ingresos += Number(c.monto || 0);
-            if (c.tipo === 'egreso') egresos += Number(c.monto || 0);
-        });
+        const egresosTotales = egresos.recordset[0].total || 0;
 
-        const deuda = 0;
-        const cajaTotal = ingresos - egresos;
+        const cajaTotal = ingresosTotales - egresosTotales;
 
-        return res.render('finanzas', {
-            ingresos: ingresos || 0,
-            egresos: egresos || 0,
-            deuda: deuda || 0,
-            cajaTotal: cajaTotal || 0,
-            movimientos: movimientos.recordset || []
+        res.render('finanzas', {
+            ingresos: ingresosTotales,
+            egresos: egresosTotales,
+            deuda: deuda.recordset[0].total || 0,
+            cajaTotal,
+            movimientos: movimientos.recordset || [],
+            mes,
+            anio
         });
 
     } catch (err) {
-        console.log("❌ FINANZAS ERROR:", err);
-        return res.status(500).send("Error en finanzas");
+        console.log("❌ ERROR FINANZAS:", err);
+        res.status(500).send("Error finanzas");
     }
-});
-app.get('/finanzas', auth, async (req, res) => {
-
-    const mes = Number(req.query.mes) || new Date().getMonth() + 1;
-    const anio = Number(req.query.anio) || new Date().getFullYear();
-
-    // 💰 ingresos por inquilinos
-    const pagos = await sql.query`
-        SELECT SUM(monto) as total
-        FROM Pas
-        WHERE mes=${mes} AND anio=${anio}
-    `;
-
-    // ➕ ingresos manuales
-    const ingresosExtra = await sql.query`
-        SELECT SUM(monto) as total
-        FROM CajaMovimientos
-        WHERE tipo='ingreso' AND mes=${mes} AND anio=${anio}
-    `;
-
-    // ➖ egresos
-    const egresos = await sql.query`
-        SELECT SUM(monto) as total
-        FROM CajaMovimientos
-        WHERE tipo='egreso' AND mes=${mes} AND anio=${anio}
-    `;
-
-    // 🧠 deuda total
-    const deuda = await sql.query`
-        SELECT SUM(precio) as total FROM Inquilinos
-        WHERE estado != 'retirado'
-    `;
-
-    // 🧾 movimientos recientes
-    const movimientos = await sql.query`
-        SELECT TOP 30 *
-        FROM CajaMovimientos
-        ORDER BY fecha DESC
-    `;
-
-    const ingresosTotales =
-        (pagos.recordset[0].total || 0) +
-        (ingresosExtra.recordset[0].total || 0);
-
-    const egresosTotales = egresos.recordset[0].total || 0;
-
-    const cajaTotal = ingresosTotales - egresosTotales;
-
-    res.render('finanzas', {
-        ingresos: ingresosTotales,
-        egresos: egresosTotales,
-        deuda: deuda.recordset[0].total || 0,
-        cajaTotal,
-        movimientos: movimientos.recordset,
-        mes,
-        anio
-    });
 });
 app.post('/finanzas/movimiento', auth, async (req, res) => {
     try {
