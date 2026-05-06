@@ -49,13 +49,13 @@ button {
 
 <h2>🤝 DEUDORES / PRÉSTAMOS</h2>
 
-<!-- TOTAL -->
+<!-- 💰 TOTAL -->
 <div class="card">
     <h3>Total prestado</h3>
     <div class="total">S/ <%= total %></div>
 </div>
 
-<!-- FORM -->
+<!-- ➕ REGISTRAR PRÉSTAMO -->
 <div class="card">
     <h3>Registrar préstamo</h3>
 
@@ -65,6 +65,9 @@ button {
 
         <input type="number" name="monto" placeholder="Monto prestado" required>
 
+        <!-- 📅 NUEVO: FECHA REAL -->
+        <input type="date" name="fecha" required>
+
         <input type="number" name="mes" value="<%= mes %>" required>
 
         <input type="number" name="anio" value="<%= anio %>" required>
@@ -73,20 +76,47 @@ button {
     </form>
 </div>
 
-<!-- LISTA -->
+<!-- 💸 PAGAR DEUDA (NUEVO BLOQUE) -->
 <div class="card">
-    <h3>Historial</h3>
+    <h3>💸 Registrar pago de deuda</h3>
+
+    <form method="POST" action="/deudores/pagar">
+
+        <input type="text" name="concepto" placeholder="Nombre del deudor" required>
+
+        <input type="number" name="monto" placeholder="Monto que paga" required>
+
+        <input type="date" name="fecha" required>
+
+        <input type="number" name="mes" value="<%= mes %>" required>
+
+        <input type="number" name="anio" value="<%= anio %>" required>
+
+        <button type="submit">Registrar pago</button>
+    </form>
+</div>
+
+<!-- 📊 HISTORIAL COMPLETO -->
+<div class="card">
+    <h3>📊 Historial de movimientos</h3>
 
     <% prestamos.forEach(p => { %>
         <div class="mov">
+
             <div>
                 <b><%= p.concepto %></b><br>
-                <small><%= p.usuario %> - <%= new Date(p.fecha).toLocaleString() %></small>
+
+                <small>
+                    👤 <%= p.usuario %> |
+                    📅 <%= new Date(p.fecha).toLocaleString() %> |
+                    🧾 <%= p.tipo %>
+                </small>
             </div>
 
-            <div style="color:#fbbf24">
-                - S/ <%= p.monto %>
+            <div style="color:<%= p.tipo === 'prestamo' ? '#fbbf24' : '#22c55e' %>">
+                <%= p.tipo === 'prestamo' ? '-' : '+' %> S/ <%= p.monto %>
             </div>
+
         </div>
     <% }) %>
 

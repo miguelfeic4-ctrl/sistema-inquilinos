@@ -942,6 +942,29 @@ app.get('/deudores', auth, async (req, res) => {
         res.status(500).send("Error deudores");
     }
 });
+app.post('/deudores/pagar', auth, async (req, res) => {
+    try {
+
+        const { concepto, monto } = req.body;
+
+        const fecha = new Date();
+        const mes = fecha.getMonth() + 1;
+        const anio = fecha.getFullYear();
+
+        await sql.query`
+            INSERT INTO CajaMovimientos
+            (tipo, concepto, monto, mes, anio, usuario, referencia)
+            VALUES
+            ('ingreso', ${concepto + ' - pago deuda'}, ${Number(monto)}, ${mes}, ${anio}, ${req.session.usuario}, 'deudor_pago')
+        `;
+
+        res.redirect('/deudores');
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Error pagando deuda");
+    }
+});
 app.post('/deudores/agregar', auth, async (req, res) => {
     try {
 
