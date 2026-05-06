@@ -1046,10 +1046,38 @@ app.post('/deudores/agregar', auth, async (req, res) => {
         res.status(500).send("Error");
     }
 });
-app.post('/egresos', auth, async (req, res) => {
+app.get('/egresos', auth, async (req, res) => {
     try {
 
-        const { concepto, fecha, monto } = req.body;
+        // 📅 mes seleccionado (formato: 2026-05)
+        const mesSeleccionado = req.query.mes || new Date().toISOString().slice(0,7);
+
+        const result = await sql.query`
+            SELECT concepto, monto, fecha
+            FROM Egresos
+            WHERE FORMAT(fecha, 'yyyy-MM') = ${mesSeleccionado}
+            ORDER BY fecha DESC
+        `;
+
+        const movimientos = result.recordset;
+
+        const total = movimientos.reduce((acc, m) => acc + m.monto, 0);
+
+        res.render('egresos', {
+            movimientos,
+            total,
+            mesSeleccionado
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.send('Error egresos');
+    }
+});
+app.post('/egresos/agregar', auth, async (req, res) => {
+    try {
+
+        const { concepto, monto, fecha } = req.body;
 
         await sql.query`
             INSERT INTO Egresos (concepto, monto, fecha)
@@ -1061,25 +1089,6 @@ app.post('/egresos', auth, async (req, res) => {
     } catch (err) {
         console.log(err);
         res.send('Error al guardar egreso');
-    }
-});
-app.post('/egresos/agregar', auth, async (req, res) => {
-    try {
-
-        const { concepto, monto, mes, anio } = req.body;
-
-        await sql.query`
-            INSERT INTO CajaMovimientos
-            (tipo, concepto, monto, mes, anio, usuario)
-            VALUES
-            ('egreso', ${concepto}, ${monto}, ${mes}, ${anio}, ${req.session.usuario})
-        `;
-
-        res.redirect('/egresos');
-
-    } catch (err) {
-        console.log(err);
-        res.status(500).send('Error egresos');
     }
 });
 // =====================
