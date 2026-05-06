@@ -991,7 +991,11 @@ app.post('/reiniciar-finanzas', auth, async (req, res) => {
     }
 });
 
+// ===========================
+// ❌ ELIMINAR MOVIMIENTO
+// ===========================
 app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
+
     try {
 
         const id = req.params.id;
@@ -1004,9 +1008,12 @@ app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
         res.redirect('/finanzas');
 
     } catch (err) {
+
         console.log(err);
         res.send('Error eliminando movimiento');
+
     }
+
 });
 app.get('/deudores', auth, async (req, res) => {
     try {
