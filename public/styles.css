@@ -210,6 +210,43 @@ tr:hover {
     box-shadow: 0 0 40px rgba(56,189,248,0.15);
     border: 1px solid rgba(56,189,248,0.2);
 }
+/* ===== DROPDOWN FINANZAS ===== */
+
+.nav-item {
+    position: relative;
+}
+
+.dropdown-menu-custom {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #111827;
+    border-radius: 10px;
+    min-width: 180px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    overflow: hidden;
+    z-index: 999;
+}
+
+.dropdown-menu-custom a {
+    display: block;
+    padding: 10px 15px;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.dropdown-menu-custom a:hover {
+    background: #1f2937;
+    color: #38bdf8;
+}
+
+/* Mostrar al pasar mouse */
+.nav-item:hover .dropdown-menu-custom {
+    display: block;
+}
 
 /* =========================
    📱 RESPONSIVE
