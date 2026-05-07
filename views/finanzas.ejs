@@ -35,6 +35,7 @@ body {
     padding: 18px;
     border-radius: 14px;
     border: 1px solid rgba(56,189,248,0.1);
+    transition: 0.2s;
 }
 
 .card:hover {
@@ -42,16 +43,22 @@ body {
     box-shadow: 0 0 20px rgba(56,189,248,0.2);
 }
 
-.positive { color: #22c55e; }
-.negative { color: #ef4444; }
+.positive { 
+    color: #22c55e; 
+}
+
+.negative { 
+    color: #ef4444; 
+}
 
 .mov {
     background: #0f172a;
-    padding: 10px;
+    padding: 14px;
     border-radius: 10px;
-    margin-top: 8px;
+    margin-top: 10px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     border-left: 3px solid #38bdf8;
 }
 
@@ -61,30 +68,60 @@ body {
     border-radius: 14px;
     margin-top: 20px;
 }
+
+.delete-btn {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.delete-btn:hover {
+    opacity: 0.8;
+}
+
+.reset-btn {
+    background: #ef4444;
+    color: white;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
 </style>
 
 <div class="container">
 
 <!-- 💳 CAJA -->
 <div class="hero">
+
     <h3>💰 Caja total</h3>
+
     <div class="balance">
         S/ <%= cajaTotal || 0 %>
     </div>
-    <small>Flujo financiero del sistema</small>
+
+    <small>
+        Flujo financiero del sistema
+    </small>
+
 </div>
 
-<form action="/finanzas/reset-caja" method="POST" onsubmit="return confirm('¿Seguro que quieres reiniciar la caja total a 0?')">
-    <button style="
-        background: #ef4444;
-        color: white;
-        padding: 8px 12px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-    ">
+<!-- 🔄 RESET -->
+<form 
+    action="/reiniciar-finanzas" 
+    method="POST"
+    onsubmit="return confirm('¿Seguro que quieres reiniciar TODAS las finanzas?')"
+>
+
+    <button class="reset-btn">
         🔄 Reiniciar Caja Total
     </button>
+
 </form>
 
 <!-- 📊 CARDS -->
@@ -92,23 +129,32 @@ body {
 
     <div class="card">
         <h4>Ingreso mensual</h4>
-        <h2 class="positive">S/ <%= ingresos || 0 %></h2>
+        <h2 class="positive">
+            S/ <%= ingresos || 0 %>
+        </h2>
     </div>
 
     <div class="card">
         <h4>Egresos</h4>
-        <h2 class="negative">S/ <%= egresos || 0 %></h2>
+        <h2 class="negative">
+            S/ <%= egresos || 0 %>
+        </h2>
     </div>
 
     <div class="card">
         <h4>Deuda</h4>
-        <h2 class="negative">S/ <%= deuda || 0 %></h2>
+        <h2 class="negative">
+            S/ <%= deuda || 0 %>
+        </h2>
     </div>
 
     <div class="card">
         <h4>Estado caja</h4>
+
         <h2 class="<%= (cajaTotal || 0) >= 0 ? 'positive' : 'negative' %>">
+
             <%= (cajaTotal || 0) >= 0 ? 'POSITIVO' : 'NEGATIVO' %>
+
         </h2>
     </div>
 
@@ -116,63 +162,67 @@ body {
 
 <!-- 📈 CHART -->
 <div class="chart-box">
+
     <h3>📊 Flujo de caja</h3>
+
     <canvas id="chart"></canvas>
+
 </div>
 
 <!-- 🧾 MOVIMIENTOS -->
-<h3 style="margin-top:20px;">🧾 Últimos movimientos</h3>
+<h3 style="margin-top:20px;">
+    🧾 Últimos movimientos
+</h3>
 
 <% if (movimientos && movimientos.length > 0) { %>
 
     <% movimientos.forEach(m => { %>
 
-    <div class="mov" style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-bottom:10px;
-        padding:10px;
-        border:1px solid #333;
-        border-radius:10px;
-    ">
+        <div class="mov">
 
-        <div>
-            <b><%= m.concepto %></b><br>
+            <div>
 
-            <small>
-                <%= m.tipo %> -
-                <%= m.usuario %> -
-                <%= new Date(m.fecha).toLocaleString() %>
-            </small><br>
+                <b>
+                    <%= m.concepto %>
+                </b>
 
-            <span>
-                S/ <%= m.monto %>
-            </span>
+                <br>
+
+                <small>
+
+                    <%= m.tipo %> -
+                    <%= m.usuario %> -
+                    <%= new Date(m.fecha).toLocaleString() %>
+
+                </small>
+
+                <br>
+
+                <span>
+                    S/ <%= m.monto %>
+                </span>
+
+            </div>
+
+            <!-- ❌ ELIMINAR -->
+            <form 
+                action="/eliminar-movimiento/<%= m.id %>" 
+                method="POST"
+                onsubmit="return confirm('¿Eliminar este movimiento?')"
+            >
+
+                <button 
+                    type="submit"
+                    class="delete-btn"
+                >
+                    Eliminar
+                </button>
+
+            </form>
+
         </div>
 
-        <!-- ❌ BOTON ELIMINAR -->
-       <form action="/eliminar-movimiento/<%= m.id %>" method="POST">
-
-            <button
-                type="submit"
-                style="
-                    background:red;
-                    color:white;
-                    border:none;
-                    padding:8px 12px;
-                    border-radius:8px;
-                    cursor:pointer;
-                "
-            >
-                Eliminar
-            </button>
-
-        </form>
-
-    </div>
-
-<% }) %>
+    <% }) %>
 
 <% } else { %>
 
@@ -185,17 +235,35 @@ body {
 </div>
 
 <script>
+
 const ctx = document.getElementById('chart');
 
 new Chart(ctx, {
+
     type: 'line',
+
     data: {
+
         labels: ['Ene','Feb','Mar','Abr','May','Jun'],
+
         datasets: [{
+
             label: 'Flujo de caja',
-            data: [0, 0, 0, 0, 0, <%= cajaTotal || 0 %>],
-            borderColor: '#38bdf8'
+
+            data: [
+                0,
+                0,
+                0,
+                0,
+                0,
+                <%= cajaTotal || 0 %>
+            ],
+
+            borderColor: '#38bdf8',
+            tension: 0.3
+
         }]
     }
 });
+
 </script>

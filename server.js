@@ -1158,6 +1158,9 @@ app.post('/egresos/agregar', auth, async (req, res) => {
 // ===========================
 // ❌ ELIMINAR MOVIMIENTO
 // ===========================
+// ===========================
+// ❌ ELIMINAR MOVIMIENTO
+// ===========================
 app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
 
     try {
