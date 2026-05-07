@@ -810,113 +810,83 @@ app.post('/caja/agregar', auth, async (req, res) => {
 });
 
 app.get('/finanzas', auth, async (req, res) => {
+
     try {
 
         const mes = Number(req.query.mes) || new Date().getMonth() + 1;
         const anio = Number(req.query.anio) || new Date().getFullYear();
 
-        // 💰 pagos inquilinos
+        // 💰 PAGOS INQUILINOS
         const pagos = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM Pas
             WHERE mes = ${mes} AND anio = ${anio}
         `;
 
-        // 💰 préstamos del mes
-        const prestamos = await sql.query`
-            SELECT ISNULL(SUM(monto), 0) as total
-            FROM CajaMovimientos
-            WHERE tipo = 'prestamo'
-            AND mes = ${mes} AND anio = ${anio}
-        `;
-
-        // 💰 pagos de préstamos del mes
-        const pagosPrestamos = await sql.query`
-            SELECT ISNULL(SUM(monto), 0) as total
-            FROM CajaMovimientos
-            WHERE tipo = 'pago_prestamo'
-            AND mes = ${mes} AND anio = ${anio}
-        `;
-
-        // ➕ ingresos extra
-        const ingresosExtra = await sql.query`
-            SELECT ISNULL(SUM(monto), 0) as total
-            FROM CajaMovimientos
-            WHERE tipo='ingreso'
-            AND mes = ${mes} AND anio = ${anio}
-        `;
-
-        // ➖ egresos
-        const egresosResult = await sql.query`
+        // 💸 EGRESOS
+        const egresos = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM Egresos
-            WHERE MONTH(fecha) = ${mes} AND YEAR(fecha) = ${anio}
+            WHERE mes = ${mes} AND anio = ${anio}
         `;
 
-        const egresos = egresosResult.recordset?.[0]?.total || 0;
-
-        // 🤝 DEUDA REAL GLOBAL (CORREGIDO)
-        const deudaResult = await sql.query`
+        // 🧾 MOVIMIENTOS (TODO EL HISTORIAL UNIFICADO)
+        const movimientos = await sql.query(`
             SELECT 
+                id,
+                tipo,
                 concepto,
+                monto,
+                mes,
+                anio,
+                usuario,
+                referencia,
+                fecha
+            FROM cajamovimientos
+            WHERE mes = ${mes} AND anio = ${anio}
+            ORDER BY fecha DESC
+        `);
+
+        // 🤝 DEUDA (prestamos - pagos)
+        const deudaData = await sql.query(`
+            SELECT 
                 SUM(CASE WHEN tipo = 'prestamo' THEN monto ELSE 0 END) as prestado,
                 SUM(CASE WHEN tipo = 'pago_prestamo' THEN monto ELSE 0 END) as pagado
-            FROM CajaMovimientos
-            GROUP BY concepto
-        `;
+            FROM cajamovimientos
+            WHERE mes = ${mes} AND anio = ${anio}
+        `);
 
-        const deuda = (deudaResult.recordset || [])
-            .map(d => (d.prestado || 0) - (d.pagado || 0))
-            .filter(saldo => saldo > 0.01) // 🔥 evita residuos tipo -0.0001 o 0.00001
-            .reduce((acc, s) => acc + s, 0);
+        const prestado = deudaData.recordset[0]?.prestado || 0;
+        const pagado = deudaData.recordset[0]?.pagado || 0;
 
-        // 🧾 movimientos
-        const movimientos = await sql.query(`
-    SELECT
-        id,
-        tipo,
-        concepto,
-        monto,
-        mes,
-        anio,
-        usuario,
-        referencia,
-        fecha
-    FROM cajamovimientos
-    ORDER BY fecha DESC
-`);
+        const deuda = Math.max(prestado - pagado, 0);
 
-        // 🛡️ PROTECCIÓN
-        const totalPagos = pagos.recordset?.[0]?.total || 0;
-        const totalPrestamos = prestamos.recordset?.[0]?.total || 0;
-        const totalPagosPrestamos = pagosPrestamos.recordset?.[0]?.total || 0;
-        const totalIngresosExtra = ingresosExtra.recordset?.[0]?.total || 0;
+        // 📊 VALORES PRINCIPALES
+        const ingresos = pagos.recordset[0]?.total || 0;
+        const egresosTotal = egresos.recordset[0]?.total || 0;
 
-        // 📊 CÁLCULOS
-        const ingresosTotales = totalPagos + totalIngresosExtra;
-
-        const egresosTotales = egresos;
-
-        const cajaTotal =
-            ingresosTotales -
-            egresosTotales -
-            totalPrestamos +
-            totalPagosPrestamos;
+        // 💰 CAJA REAL (simple y sin bugs)
+        const cajaTotal = ingresos - egresosTotal;
 
         res.render('finanzas', {
-            ingresos: ingresosTotales,
-            egresos: egresosTotales,
+
+            ingresos,
+            egresos: egresosTotal,
             deuda,
             cajaTotal,
             movimientos: movimientos.recordset || [],
             mes,
             anio
+
         });
 
     } catch (err) {
+
         console.log("❌ ERROR FINANZAS:", err);
         res.status(500).send("Error finanzas");
+
     }
+
 });
 // ===========================
 // ❌ ELIMINAR EGRESO

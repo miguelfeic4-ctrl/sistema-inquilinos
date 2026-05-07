@@ -43,13 +43,8 @@ body {
     box-shadow: 0 0 20px rgba(56,189,248,0.2);
 }
 
-.positive { 
-    color: #22c55e; 
-}
-
-.negative { 
-    color: #ef4444; 
-}
+.positive { color: #22c55e; }
+.negative { color: #ef4444; }
 
 .mov {
     background: #0f172a;
@@ -105,9 +100,7 @@ body {
         S/ <%= cajaTotal || 0 %>
     </div>
 
-    <small>
-        Flujo financiero del sistema
-    </small>
+    <small>Flujo financiero del sistema</small>
 
 </div>
 
@@ -156,6 +149,7 @@ body {
             <%= (cajaTotal || 0) >= 0 ? 'POSITIVO' : 'NEGATIVO' %>
 
         </h2>
+
     </div>
 
 </div>
@@ -170,9 +164,7 @@ body {
 </div>
 
 <!-- 🧾 MOVIMIENTOS -->
-<h3 style="margin-top:20px;">
-    🧾 Últimos movimientos
-</h3>
+<h3 style="margin-top:20px;">🧾 Últimos movimientos</h3>
 
 <% if (movimientos && movimientos.length > 0) { %>
 
@@ -182,24 +174,26 @@ body {
 
             <div>
 
-                <b>
-                    <%= m.concepto %>
-                </b>
-
-                <br>
+                <b><%= m.concepto %></b><br>
 
                 <small>
 
-                    <%= m.tipo %> -
-                    <%= m.usuario %> -
-                    <%= new Date(m.fecha).toLocaleString() %>
+                    <span style="color:#38bdf8;">
+                        <%= m.tipo %>
+                    </span>
 
-                </small>
+                    -
 
-                <br>
+                    <%= m.usuario || 'sistema' %>
 
-                <span>
-                    S/ <%= m.monto %>
+                    -
+
+                    <%= m.fecha ? new Date(m.fecha).toLocaleString() : '' %>
+
+                </small><br>
+
+                <span style="color:<%= m.tipo === 'egreso' ? '#ef4444' : '#22c55e' %>;">
+                    S/ <%= Number(m.monto || 0) %>
                 </span>
 
             </div>
@@ -211,10 +205,7 @@ body {
                 onsubmit="return confirm('¿Eliminar este movimiento?')"
             >
 
-                <button 
-                    type="submit"
-                    class="delete-btn"
-                >
+                <button type="submit" class="delete-btn">
                     Eliminar
                 </button>
 
@@ -226,9 +217,7 @@ body {
 
 <% } else { %>
 
-    <p style="opacity:0.6;">
-        No hay movimientos registrados
-    </p>
+    <p style="opacity:0.6;">No hay movimientos registrados</p>
 
 <% } %>
 
@@ -251,12 +240,8 @@ new Chart(ctx, {
             label: 'Flujo de caja',
 
             data: [
-                0,
-                0,
-                0,
-                0,
-                0,
-                <%= cajaTotal || 0 %>
+                0, 0, 0, 0, 0,
+                Number(<%= cajaTotal || 0 %>)
             ],
 
             borderColor: '#38bdf8',
@@ -264,6 +249,7 @@ new Chart(ctx, {
 
         }]
     }
+
 });
 
 </script>
