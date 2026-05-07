@@ -1144,32 +1144,54 @@ app.post('/deudores/agregar', auth, async (req, res) => {
     }
 });
 app.get('/egresos', auth, async (req, res) => {
+
     try {
 
-        // 📅 mes seleccionado (formato: 2026-05)
-        const mesSeleccionado = req.query.mes || new Date().toISOString().slice(0,7);
+        // 📅 mes seleccionado
+        const mesSeleccionado =
+            req.query.mes ||
+            new Date().toISOString().slice(0,7);
 
+        // 🔍 obtener egresos
         const result = await sql.query`
-            SELECT concepto, monto, fecha
-            FROM Egresos
+
+            SELECT
+                id,
+                concepto,
+                monto,
+                fecha
+
+            FROM egresos
+
             WHERE FORMAT(fecha, 'yyyy-MM') = ${mesSeleccionado}
+
             ORDER BY fecha DESC
         `;
 
         const movimientos = result.recordset;
 
-        const total = movimientos.reduce((acc, m) => acc + m.monto, 0);
+        // 💰 total
+        const total = movimientos.reduce(
+            (acc, m) => acc + Number(m.monto),
+            0
+        );
 
+        // 📤 render
         res.render('egresos', {
+
             movimientos,
             total,
             mesSeleccionado
+
         });
 
     } catch (err) {
+
         console.log(err);
         res.send('Error egresos');
+
     }
+
 });
 app.post('/egresos/agregar', auth, async (req, res) => {
     try {
@@ -1198,23 +1220,29 @@ app.post('/egresos/agregar', auth, async (req, res) => {
 // ===========================
 // ❌ ELIMINAR MOVIMIENTO
 // ===========================
-app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
+app.post('/eliminar-egreso/:id', auth, async (req, res) => {
 
     try {
 
         const id = req.params.id;
 
         await sql.query(`
-            DELETE FROM cajamovimientos
+            DELETE FROM egresos
             WHERE id = ${id}
         `);
 
-        res.redirect('/finanzas');
+        await sql.query(`
+            DELETE FROM cajamovimientos
+            WHERE referencia = ${id}
+            AND tipo = 'egreso'
+        `);
+
+        res.redirect('/egresos');
 
     } catch (err) {
 
         console.log(err);
-        res.send('Error eliminando movimiento');
+        res.send('Error eliminando egreso');
 
     }
 
