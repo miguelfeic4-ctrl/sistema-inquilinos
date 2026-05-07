@@ -996,27 +996,7 @@ app.post('/reiniciar-finanzas', auth, async (req, res) => {
 // ===========================
 // ❌ ELIMINAR MOVIMIENTO
 // ===========================
-app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
 
-    try {
-
-        const id = req.params.id;
-
-        await sql.query(`
-            DELETE FROM cajamovimientos
-            WHERE id = ${id}
-        `);
-
-        res.redirect('/finanzas');
-
-    } catch (err) {
-
-        console.log(err);
-        res.send('Error eliminando movimiento');
-
-    }
-
-});
 app.get('/deudores', auth, async (req, res) => {
     try {
 
@@ -1174,6 +1154,31 @@ app.post('/egresos/agregar', auth, async (req, res) => {
 // =====================
 // 🚀 SERVER
 // =====================
+
+// ===========================
+// ❌ ELIMINAR MOVIMIENTO
+// ===========================
+app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
+
+    try {
+
+        const id = req.params.id;
+
+        await sql.query(`
+            DELETE FROM cajamovimientos
+            WHERE id = ${id}
+        `);
+
+        res.redirect('/finanzas');
+
+    } catch (err) {
+
+        console.log(err);
+        res.send('Error eliminando movimiento');
+
+    }
+
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
