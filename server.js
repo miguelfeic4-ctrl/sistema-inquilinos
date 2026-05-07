@@ -1199,6 +1199,23 @@ app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
     }
 
 });
+app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
+    try {
+
+        const id = req.params.id;
+
+        await sql.query`
+            DELETE FROM CajaMovimientos
+            WHERE id = ${id}
+        `;
+
+        res.redirect('/finanzas');
+
+    } catch (err) {
+        console.log("ERROR ELIMINAR MOVIMIENTO:", err);
+        res.send("Error eliminando movimiento");
+    }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
