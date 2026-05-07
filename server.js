@@ -1014,10 +1014,9 @@ app.post('/reiniciar-finanzas', auth, async (req, res) => {
             DELETE FROM egresos
         `);
 
-        // 💰 reiniciar caja
+        // 💰 reiniciar caja (tu tabla NO tiene total, solo monto)
         await sql.query(`
-            UPDATE caja
-            SET total = 0
+            DELETE FROM caja
         `);
 
         res.redirect('/finanzas');
