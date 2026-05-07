@@ -152,7 +152,7 @@ body {
         </div>
 
         <!-- ❌ BOTON ELIMINAR -->
-        <%= JSON.stringify(m) %>
+       <form action="/eliminar-movimiento/<%= m.id %>" method="POST">
 
             <button
                 type="submit"

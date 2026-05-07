@@ -968,7 +968,7 @@ app.post('/reiniciar-finanzas', auth, async (req, res) => {
 
         // borrar historial
         await sql.query(`
-            DELETE FROM movimientos
+            DELETE FROM  CajaMovimientos
         `);
 
         // reiniciar pagos
@@ -986,8 +986,10 @@ app.post('/reiniciar-finanzas', auth, async (req, res) => {
         res.redirect('/finanzas');
 
     } catch (err) {
+
         console.log(err);
         res.send('Error reiniciando finanzas');
+
     }
 });
 
@@ -1001,7 +1003,7 @@ app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
         const id = req.params.id;
 
         await sql.query(`
-            DELETE FROM movimientos
+            DELETE FROM cajamovimientos
             WHERE id = ${id}
         `);
 
