@@ -162,7 +162,6 @@ button {
     <!-- 🔹 TOP -->
     <div class="top-section">
 
-        <!-- 🔹 SELECTOR -->
         <div class="card">
 
             <h3>📅 Seleccionar mes</h3>
@@ -175,10 +174,7 @@ button {
                     value="<%= mesSeleccionado %>"
                 >
 
-                <button 
-                    type="submit"
-                    class="btn-primary"
-                >
+                <button type="submit" class="btn-primary">
                     Ver egresos
                 </button>
 
@@ -186,7 +182,6 @@ button {
 
         </div>
 
-        <!-- 🔹 TOTAL -->
         <div class="card">
 
             <h3>💰 Total egresos del mes</h3>
@@ -199,7 +194,7 @@ button {
 
     </div>
 
-    <!-- 🔹 FORMULARIO -->
+    <!-- 🔹 FORM -->
     <div class="card">
 
         <h3>➕ Registrar nuevo egreso</h3>
@@ -226,10 +221,7 @@ button {
                 required
             >
 
-            <button 
-                type="submit"
-                class="btn-primary"
-            >
+            <button type="submit" class="btn-primary">
                 Registrar egreso
             </button>
 
@@ -242,7 +234,7 @@ button {
 
         <h3>🧾 Historial de egresos</h3>
 
-        <% if (movimientos.length === 0) { %>
+        <% if (!movimientos || movimientos.length === 0) { %>
 
             <div class="empty">
                 No hay egresos registrados este mes
@@ -250,20 +242,20 @@ button {
 
         <% } %>
 
-        <% movimientos.forEach(m => { %>
+        <% movimientos.forEach(function(m) { %>
+
+            <% if (!m.id) return; %>
 
             <div class="mov">
 
                 <div class="mov-info">
 
-                    <b>
-                        <%= m.concepto %>
-                    </b>
+                    <b><%= m.concepto %></b>
 
                     <br>
 
                     <small>
-                        <%= new Date(m.fecha).toLocaleDateString() %>
+                        <%= m.fecha ? new Date(m.fecha).toLocaleDateString() : '' %>
                     </small>
 
                     <br>
@@ -281,10 +273,7 @@ button {
                     onsubmit="return confirm('¿Eliminar este egreso?')"
                 >
 
-                    <button 
-                        type="submit"
-                        class="delete-btn"
-                    >
+                    <button type="submit" class="delete-btn">
                         Eliminar
                     </button>
 
