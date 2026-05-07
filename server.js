@@ -887,7 +887,8 @@ app.get('/finanzas', auth, async (req, res) => {
 
         // 📊 CÁLCULOS
         const ingresos = (pagos.recordset[0]?.total || 0) + (ingresosExtra.recordset[0]?.total || 0);
-
+const test = await sql.query`SELECT TOP 1 * FROM Pas`;
+console.log(test.recordset[0]);
         const cajaTotal =
             ingresos -
             egresos -
