@@ -1217,7 +1217,6 @@ app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
     }
 });
 app.post('/eliminar-egreso/:id', auth, async (req, res) => {
-
     try {
 
         const id = req.params.id;
@@ -1235,7 +1234,6 @@ app.post('/eliminar-egreso/:id', auth, async (req, res) => {
         res.status(500).send("Error eliminando egreso");
 
     }
-
 });
 const PORT = process.env.PORT || 3000;
 
