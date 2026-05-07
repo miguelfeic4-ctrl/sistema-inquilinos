@@ -324,7 +324,8 @@ const anio = parseInt(req.query.anio) || new Date().getFullYear();
 
     const Pas = await sql.query`
         SELECT * FROM Pas
-        WHERE mes=${mes} AND anio=${anio}
+        WHERE MONTH(fechaPa) = ${mes}
+AND YEAR(fechaPa) = ${anio}
     `;
 
     let total = 0;
@@ -592,7 +593,8 @@ app.get('/reportes/pagos', auth, async (req, res) => {
 
         const pagos = await sql.query`
             SELECT * FROM Pas
-            WHERE mes = ${mes} AND anio = ${anio}
+            WHERE MONTH(fechaPa) = ${mes}
+AND YEAR(fechaPa) = ${anio}
         `;
 
         let total = 0;
@@ -730,7 +732,8 @@ app.get('/reportes/pagos/excel', auth, async (req, res) => {
 
         const pagos = await sql.query`
             SELECT * FROM Pas
-            WHERE mes = ${mes} AND anio = ${anio}
+             WHERE MONTH(fechaPa) = ${mes}
+AND YEAR(fechaPa) = ${anio}
         `;
 
         // 🔥 CASO 1: PASADO → VACÍO SI NO HAY PAGOS
@@ -820,8 +823,8 @@ app.get('/finanzas', auth, async (req, res) => {
         const pagos = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM Pas
-WHERE mes = ${mes}
-AND anio = ${anio}
+WHERE MONTH(fechaPa) = ${mes}
+AND YEAR(fechaPa) = ${anio}
         `;
 
         // 💰 PRESTAMOS
@@ -887,8 +890,7 @@ AND anio = ${anio}
 
         // 📊 CÁLCULOS
         const ingresos = (pagos.recordset[0]?.total || 0) + (ingresosExtra.recordset[0]?.total || 0);
-const test = await sql.query`SELECT TOP 1 * FROM Pas`;
-console.log(test.recordset[0]);
+
         const cajaTotal =
             ingresos -
             egresos -
