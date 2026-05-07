@@ -918,6 +918,38 @@ app.get('/finanzas', auth, async (req, res) => {
         res.status(500).send("Error finanzas");
     }
 });
+// ===========================
+// ❌ ELIMINAR EGRESO
+// ===========================
+app.post('/eliminar-egreso/:id', auth, async (req, res) => {
+
+    try {
+
+        const id = req.params.id;
+
+        // eliminar egreso
+        await sql.query(`
+            DELETE FROM egresos
+            WHERE id = ${id}
+        `);
+
+        // eliminar también del historial financiero
+        await sql.query(`
+            DELETE FROM cajamovimientos
+            WHERE referencia = ${id}
+            AND tipo = 'egreso'
+        `);
+
+        res.redirect('/egresos');
+
+    } catch (err) {
+
+        console.log(err);
+        res.send('Error eliminando egreso');
+
+    }
+
+});
 app.post('/finanzas/movimiento', auth, async (req, res) => {
     try {
 

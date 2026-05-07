@@ -4,108 +4,296 @@
 
 <style>
 body {
-    background: #0b1220;
+    background: linear-gradient(135deg, #0b1220, #111827);
     color: white;
-    font-family: Arial;
+    font-family: Arial, sans-serif;
+    margin: 0;
 }
 
 .container {
-    padding: 20px;
+    padding: 25px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #ef4444;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
 }
 
 .card {
     background: #111827;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 15px;
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(239,68,68,0.15);
+    box-shadow: 0 0 20px rgba(0,0,0,0.25);
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 25px rgba(239,68,68,0.15);
 }
 
 .total {
-    font-size: 28px;
+    font-size: 42px;
     color: #ef4444;
     font-weight: bold;
+    margin-top: 10px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: 1px solid #1f2937;
+    background: #0f172a;
+    color: white;
+    box-sizing: border-box;
+}
+
+input:focus {
+    outline: none;
+    border-color: #ef4444;
+}
+
+button {
+    padding: 12px 18px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background: #ef4444;
+    color: white;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
 }
 
 .mov {
     display: flex;
     justify-content: space-between;
-    padding: 10px;
-    border-bottom: 1px solid #1f2937;
+    align-items: center;
+    padding: 14px;
+    margin-top: 10px;
+    border-radius: 12px;
+    background: #0f172a;
+    border-left: 4px solid #ef4444;
 }
 
-input, button {
-    padding: 10px;
-    margin: 5px;
+.mov-info b {
+    font-size: 16px;
+}
+
+.mov small {
+    color: #9ca3af;
+}
+
+.mov-amount {
+    color: #ef4444;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.delete-btn {
+    background: #dc2626;
+    color: white;
+    padding: 8px 12px;
     border-radius: 8px;
     border: none;
+    cursor: pointer;
+    margin-top: 8px;
 }
 
-button {
-    background: #ef4444;
-    color: white;
-    cursor: pointer;
+.delete-btn:hover {
+    opacity: 0.8;
+}
+
+.empty {
+    color: #9ca3af;
+    text-align: center;
+    padding: 20px;
+}
+
+.top-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media(max-width: 768px) {
+
+    .top-section {
+        grid-template-columns: 1fr;
+    }
+
+    .mov {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
 }
 </style>
 
 <div class="container">
 
-<h2>💸 EGRESOS</h2>
+    <div class="title">
+        💸 Gestión de Egresos
+    </div>
 
-<!-- 🔹 SELECTOR DE MES -->
-<div class="card">
-    <form method="GET" action="/egresos">
-        <label>Seleccionar mes:</label>
-        <input type="month" name="mes" value="<%= mesSeleccionado %>">
-        <button type="submit">Ver</button>
-    </form>
-</div>
+    <!-- 🔹 TOP -->
+    <div class="top-section">
 
-<!-- 🔹 TOTAL -->
-<div class="card">
-    <h3>Total egresos del mes</h3>
-    <div class="total">S/ <%= total %></div>
-</div>
+        <!-- 🔹 SELECTOR -->
+        <div class="card">
 
-<!-- 🔹 FORMULARIO -->
-<div class="card">
-    <h3>Registrar egreso</h3>
+            <h3>📅 Seleccionar mes</h3>
 
-    <form method="POST" action="/egresos/agregar">
+            <form method="GET" action="/egresos">
 
-        <input type="text" name="concepto" placeholder="Ej: Luz / Agua / Internet" required>
+                <input 
+                    type="month" 
+                    name="mes" 
+                    value="<%= mesSeleccionado %>"
+                >
 
-        <input type="number" name="monto" placeholder="Monto" required>
+                <button 
+                    type="submit"
+                    class="btn-primary"
+                >
+                    Ver egresos
+                </button>
 
-        <!-- 🔥 CAMBIO IMPORTANTE: FECHA REAL -->
-        <input type="date" name="fecha" required>
+            </form>
 
-        <button type="submit">Registrar egreso</button>
-    </form>
-</div>
-
-<!-- 🔹 LISTA -->
-<div class="card">
-    <h3>Historial</h3>
-
-    <% if (movimientos.length === 0) { %>
-        <p style="color:#9ca3af;">No hay egresos en este mes</p>
-    <% } %>
-
-    <% movimientos.forEach(m => { %>
-        <div class="mov">
-            <div>
-                <b><%= m.concepto %></b><br>
-                <small>
-                    <%= new Date(m.fecha).toLocaleDateString() %>
-                </small>
-            </div>
-
-            <div style="color:#ef4444">
-                - S/ <%= m.monto %>
-            </div>
         </div>
-    <% }) %>
 
-</div>
+        <!-- 🔹 TOTAL -->
+        <div class="card">
+
+            <h3>💰 Total egresos del mes</h3>
+
+            <div class="total">
+                S/ <%= total || 0 %>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 🔹 FORMULARIO -->
+    <div class="card">
+
+        <h3>➕ Registrar nuevo egreso</h3>
+
+        <form method="POST" action="/egresos/agregar">
+
+            <input 
+                type="text" 
+                name="concepto" 
+                placeholder="Ej: Luz, Agua, Internet..."
+                required
+            >
+
+            <input 
+                type="number" 
+                name="monto" 
+                placeholder="Monto"
+                required
+            >
+
+            <input 
+                type="date" 
+                name="fecha"
+                required
+            >
+
+            <button 
+                type="submit"
+                class="btn-primary"
+            >
+                Registrar egreso
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- 🔹 HISTORIAL -->
+    <div class="card">
+
+        <h3>🧾 Historial de egresos</h3>
+
+        <% if (movimientos.length === 0) { %>
+
+            <div class="empty">
+                No hay egresos registrados este mes
+            </div>
+
+        <% } %>
+
+        <% movimientos.forEach(m => { %>
+
+            <div class="mov">
+
+                <div class="mov-info">
+
+                    <b>
+                        <%= m.concepto %>
+                    </b>
+
+                    <br>
+
+                    <small>
+                        <%= new Date(m.fecha).toLocaleDateString() %>
+                    </small>
+
+                    <br>
+
+                    <div class="mov-amount">
+                        - S/ <%= m.monto %>
+                    </div>
+
+                </div>
+
+                <!-- ❌ ELIMINAR -->
+                <form 
+                    action="/eliminar-egreso/<%= m.id %>" 
+                    method="POST"
+                    onsubmit="return confirm('¿Eliminar este egreso?')"
+                >
+
+                    <button 
+                        type="submit"
+                        class="delete-btn"
+                    >
+                        Eliminar
+                    </button>
+
+                </form>
+
+            </div>
+
+        <% }) %>
+
+    </div>
 
 </div>
