@@ -998,23 +998,23 @@ app.post('/finanzas/reset-caja', auth, async (req, res) => {
 });
 
 // ===============================
-// 🔄 REINICIAR FINANZAS COMPLETAS
+// 🔄 REINICIAR FINANZAS
 // ===============================
 app.post('/reiniciar-finanzas', auth, async (req, res) => {
+
     try {
 
-        // borrar historial
+        // 🧾 borrar historial financiero
         await sql.query(`
-            DELETE FROM  CajaMovimientos
+            DELETE FROM cajamovimientos
         `);
 
-        // reiniciar pagos
+        // 💸 borrar egresos
         await sql.query(`
-            UPDATE pas
-            SET monto = 0
+            DELETE FROM egresos
         `);
 
-        // reiniciar caja
+        // 💰 reiniciar caja
         await sql.query(`
             UPDATE caja
             SET total = 0
@@ -1025,9 +1025,14 @@ app.post('/reiniciar-finanzas', auth, async (req, res) => {
     } catch (err) {
 
         console.log(err);
-        res.send('Error reiniciando finanzas');
+
+        res.send(`
+            <h2>Error reiniciando finanzas</h2>
+            <pre>${err}</pre>
+        `);
 
     }
+
 });
 
 // ===========================
