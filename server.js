@@ -1127,21 +1127,33 @@ app.post('/deudores/agregar', auth, async (req, res) => {
     }
 });
 app.get('/egresos', auth, async (req, res) => {
+
     try {
 
-        // 📅 mes seleccionado (formato: 2026-05)
-        const mesSeleccionado = req.query.mes || new Date().toISOString().slice(0,7);
+        const mesSeleccionado =
+            req.query.mes ||
+            new Date().toISOString().slice(0, 7);
+
+        const [anio, mes] = mesSeleccionado.split('-');
 
         const result = await sql.query`
-            SELECT concepto, monto, fecha
+            SELECT
+                id,
+                concepto,
+                monto,
+                fecha
             FROM Egresos
-            WHERE FORMAT(fecha, 'yyyy-MM') = ${mesSeleccionado}
+            WHERE YEAR(fecha) = ${anio}
+            AND MONTH(fecha) = ${mes}
             ORDER BY fecha DESC
         `;
 
         const movimientos = result.recordset;
 
-        const total = movimientos.reduce((acc, m) => acc + m.monto, 0);
+        const total = movimientos.reduce(
+            (acc, m) => acc + Number(m.monto),
+            0
+        );
 
         res.render('egresos', {
             movimientos,
@@ -1150,9 +1162,12 @@ app.get('/egresos', auth, async (req, res) => {
         });
 
     } catch (err) {
+
         console.log(err);
         res.send('Error egresos');
+
     }
+
 });
 app.post('/egresos/agregar', auth, async (req, res) => {
     try {
