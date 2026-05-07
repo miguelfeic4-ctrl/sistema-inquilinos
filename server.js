@@ -816,12 +816,12 @@ app.get('/finanzas', auth, async (req, res) => {
         const mes = Number(req.query.mes) || new Date().getMonth() + 1;
         const anio = Number(req.query.anio) || new Date().getFullYear();
 
-        // 💰 PAGOS INQUILINOS
+        // 💰 PAGOS INQUILINOS (SIN TOCAR TU TABLA Pas)
         const pagos = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
-           FROM Pas
-WHERE mes = ${mes}
-AND anio = ${anio}
+            FROM Pas
+            WHERE mes = ${mes}
+            AND anio = ${anio}
         `;
 
         // 💰 PRESTAMOS
@@ -829,8 +829,8 @@ AND anio = ${anio}
             SELECT ISNULL(SUM(monto), 0) as total
             FROM CajaMovimientos
             WHERE tipo = 'prestamo'
-            AND MONTH(fecha) = ${mes}
-            AND YEAR(fecha) = ${anio}
+            AND mes = ${mes}
+            AND anio = ${anio}
         `;
 
         // 💰 PAGOS PRESTAMOS
@@ -838,8 +838,8 @@ AND anio = ${anio}
             SELECT ISNULL(SUM(monto), 0) as total
             FROM CajaMovimientos
             WHERE tipo = 'pago_prestamo'
-            AND MONTH(fecha) = ${mes}
-            AND YEAR(fecha) = ${anio}
+            AND mes = ${mes}
+            AND anio = ${anio}
         `;
 
         // ➕ INGRESOS EXTRA
@@ -847,54 +847,56 @@ AND anio = ${anio}
             SELECT ISNULL(SUM(monto), 0) as total
             FROM CajaMovimientos
             WHERE tipo = 'ingreso'
-            AND MONTH(fecha) = ${mes}
-            AND YEAR(fecha) = ${anio}
+            AND mes = ${mes}
+            AND anio = ${anio}
         `;
 
-        // ➖ EGRESOS
-        // ➖ EGRESOS (USANDO TU ESTRUCTURA REAL)
-const egresosResult = await sql.query`
-    SELECT ISNULL(SUM(monto), 0) as total
-    FROM Egresos
-    WHERE mes = ${mes}
-    AND anio = ${anio}
-`;
+        // ➖ EGRESOS (TU ESTRUCTURA REAL)
+        const egresosResult = await sql.query`
+            SELECT ISNULL(SUM(monto), 0) as total
+            FROM Egresos
+            WHERE mes = ${mes}
+            AND anio = ${anio}
+        `;
 
         const egresos = egresosResult.recordset?.[0]?.total || 0;
 
         // 🤝 DEUDA
-        const deudaResult = await sql.query(`
+        const deudaResult = await sql.query`
             SELECT 
                 SUM(CASE WHEN tipo = 'prestamo' THEN monto ELSE 0 END) as prestado,
                 SUM(CASE WHEN tipo = 'pago_prestamo' THEN monto ELSE 0 END) as pagado
             FROM CajaMovimientos
-            WHERE MONTH(fecha) = ${mes}
-            AND YEAR(fecha) = ${anio}
-        `);
+            WHERE mes = ${mes}
+            AND anio = ${anio}
+        `;
 
-        const prestado = deudaResult.recordset[0]?.prestado || 0;
-        const pagado = deudaResult.recordset[0]?.pagado || 0;
+        const prestado = deudaResult.recordset?.[0]?.prestado || 0;
+        const pagado = deudaResult.recordset?.[0]?.pagado || 0;
 
         const deuda = Math.max(prestado - pagado, 0);
 
-        // 🧾 MOVIMIENTOS
-        const movimientos = await sql.query(`
+        // 🧾 MOVIMIENTOS (NO TOCAMOS TU HISTORIAL)
+        const movimientos = await sql.query`
             SELECT *
             FROM cajamovimientos
-            WHERE MONTH(fecha) = ${mes}
-            AND YEAR(fecha) = ${anio}
+            WHERE mes = ${mes}
+            AND anio = ${anio}
             ORDER BY fecha DESC
-        `);
+        `;
 
-        // 📊 TOTALES
+        // 📊 CÁLCULOS
         const ingresos = (pagos.recordset[0]?.total || 0) + (ingresosExtra.recordset[0]?.total || 0);
-        const egresosTotal = egresos;
 
-        const cajaTotal = ingresos - egresosTotal - prestamos.recordset[0]?.total + pagosPrestamos.recordset[0]?.total;
+        const cajaTotal =
+            ingresos -
+            egresos -
+            (prestamos.recordset[0]?.total || 0) +
+            (pagosPrestamos.recordset[0]?.total || 0);
 
         res.render('finanzas', {
             ingresos,
-            egresos: egresosTotal,
+            egresos,
             deuda,
             cajaTotal,
             movimientos: movimientos.recordset || [],
