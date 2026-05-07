@@ -921,13 +921,16 @@ app.get('/finanzas', auth, async (req, res) => {
 // ===========================
 // ❌ ELIMINAR EGRESO
 // ===========================
+// ===========================
+// ❌ ELIMINAR EGRESO
+// ===========================
 app.post('/eliminar-egreso/:id', auth, async (req, res) => {
 
     try {
 
         const id = req.params.id;
 
-        // eliminar egreso
+        // eliminar de egresos
         await sql.query(`
             DELETE FROM egresos
             WHERE id = ${id}
