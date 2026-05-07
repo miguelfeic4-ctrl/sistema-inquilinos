@@ -871,18 +871,20 @@ app.get('/finanzas', auth, async (req, res) => {
             .reduce((acc, s) => acc + s, 0);
 
         // 🧾 movimientos
-        const movimientos = await sql.query`
-            SELECT TOP 50
-                tipo,
-                concepto,
-                monto,
-                fecha,
-                usuario,
-                mes,
-                anio
-            FROM CajaMovimientos
-            ORDER BY fecha DESC
-        `;
+        const movimientos = await sql.query(`
+    SELECT
+        id,
+        tipo,
+        concepto,
+        monto,
+        mes,
+        anio,
+        usuario,
+        referencia,
+        fecha
+    FROM cajamovimientos
+    ORDER BY fecha DESC
+`);
 
         // 🛡️ PROTECCIÓN
         const totalPagos = pagos.recordset?.[0]?.total || 0;
