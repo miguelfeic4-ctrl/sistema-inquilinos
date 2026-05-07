@@ -820,8 +820,8 @@ app.get('/finanzas', auth, async (req, res) => {
         const pagos = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM Pas
-            WHERE MONTH(fecha) = ${mes}
-            AND YEAR(fecha) = ${anio}
+WHERE mes = ${mes}
+AND anio = ${anio}
         `;
 
         // 💰 PRESTAMOS
