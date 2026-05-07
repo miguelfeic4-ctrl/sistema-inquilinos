@@ -324,8 +324,7 @@ const anio = parseInt(req.query.anio) || new Date().getFullYear();
 
     const Pas = await sql.query`
         SELECT * FROM Pas
-        WHERE MONTH(fechaPa) = ${mes}
-AND YEAR(fechaPa) = ${anio}
+        WHERE mes=${mes} AND anio=${anio}
     `;
 
     let total = 0;
@@ -593,8 +592,7 @@ app.get('/reportes/pagos', auth, async (req, res) => {
 
         const pagos = await sql.query`
             SELECT * FROM Pas
-            WHERE MONTH(fechaPa) = ${mes}
-AND YEAR(fechaPa) = ${anio}
+            WHERE mes = ${mes} AND anio = ${anio}
         `;
 
         let total = 0;
@@ -732,8 +730,7 @@ app.get('/reportes/pagos/excel', auth, async (req, res) => {
 
         const pagos = await sql.query`
             SELECT * FROM Pas
-             WHERE MONTH(fechaPa) = ${mes}
-AND YEAR(fechaPa) = ${anio}
+            WHERE mes = ${mes} AND anio = ${anio}
         `;
 
         // 🔥 CASO 1: PASADO → VACÍO SI NO HAY PAGOS
@@ -813,93 +810,100 @@ app.post('/caja/agregar', auth, async (req, res) => {
 });
 
 app.get('/finanzas', auth, async (req, res) => {
-
     try {
 
         const mes = Number(req.query.mes) || new Date().getMonth() + 1;
         const anio = Number(req.query.anio) || new Date().getFullYear();
 
-        // 💰 PAGOS INQUILINOS (SIN TOCAR TU TABLA Pas)
+        // 💰 pagos inquilinos
         const pagos = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM Pas
-WHERE MONTH(fechaPa) = ${mes}
-AND YEAR(fechaPa) = ${anio}
+            WHERE mes = ${mes} AND anio = ${anio}
         `;
 
-        // 💰 PRESTAMOS
+        // 💰 préstamos del mes
         const prestamos = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM CajaMovimientos
             WHERE tipo = 'prestamo'
-            AND mes = ${mes}
-            AND anio = ${anio}
+            AND mes = ${mes} AND anio = ${anio}
         `;
 
-        // 💰 PAGOS PRESTAMOS
+        // 💰 pagos de préstamos del mes
         const pagosPrestamos = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM CajaMovimientos
             WHERE tipo = 'pago_prestamo'
-            AND mes = ${mes}
-            AND anio = ${anio}
+            AND mes = ${mes} AND anio = ${anio}
         `;
 
-        // ➕ INGRESOS EXTRA
+        // ➕ ingresos extra
         const ingresosExtra = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM CajaMovimientos
-            WHERE tipo = 'ingreso'
-            AND mes = ${mes}
-            AND anio = ${anio}
+            WHERE tipo='ingreso'
+            AND mes = ${mes} AND anio = ${anio}
         `;
 
-        // ➖ EGRESOS (TU ESTRUCTURA REAL)
+        // ➖ egresos
         const egresosResult = await sql.query`
             SELECT ISNULL(SUM(monto), 0) as total
             FROM Egresos
-            WHERE mes = ${mes}
-            AND anio = ${anio}
+            WHERE MONTH(fecha) = ${mes} AND YEAR(fecha) = ${anio}
         `;
 
         const egresos = egresosResult.recordset?.[0]?.total || 0;
 
-        // 🤝 DEUDA
+        // 🤝 DEUDA REAL GLOBAL (CORREGIDO)
         const deudaResult = await sql.query`
             SELECT 
+                concepto,
                 SUM(CASE WHEN tipo = 'prestamo' THEN monto ELSE 0 END) as prestado,
                 SUM(CASE WHEN tipo = 'pago_prestamo' THEN monto ELSE 0 END) as pagado
             FROM CajaMovimientos
-            WHERE mes = ${mes}
-            AND anio = ${anio}
+            GROUP BY concepto
         `;
 
-        const prestado = deudaResult.recordset?.[0]?.prestado || 0;
-        const pagado = deudaResult.recordset?.[0]?.pagado || 0;
+        const deuda = (deudaResult.recordset || [])
+            .map(d => (d.prestado || 0) - (d.pagado || 0))
+            .filter(saldo => saldo > 0.01) // 🔥 evita residuos tipo -0.0001 o 0.00001
+            .reduce((acc, s) => acc + s, 0);
 
-        const deuda = Math.max(prestado - pagado, 0);
-
-        // 🧾 MOVIMIENTOS (NO TOCAMOS TU HISTORIAL)
+        // 🧾 movimientos
         const movimientos = await sql.query`
-            SELECT *
-            FROM cajamovimientos
-            WHERE mes = ${mes}
-            AND anio = ${anio}
+            SELECT TOP 50
+                tipo,
+                concepto,
+                monto,
+                fecha,
+                usuario,
+                mes,
+                anio
+            FROM CajaMovimientos
             ORDER BY fecha DESC
         `;
 
+        // 🛡️ PROTECCIÓN
+        const totalPagos = pagos.recordset?.[0]?.total || 0;
+        const totalPrestamos = prestamos.recordset?.[0]?.total || 0;
+        const totalPagosPrestamos = pagosPrestamos.recordset?.[0]?.total || 0;
+        const totalIngresosExtra = ingresosExtra.recordset?.[0]?.total || 0;
+
         // 📊 CÁLCULOS
-        const ingresos = (pagos.recordset[0]?.total || 0) + (ingresosExtra.recordset[0]?.total || 0);
+        const ingresosTotales = totalPagos + totalIngresosExtra;
+
+        const egresosTotales = egresos;
 
         const cajaTotal =
-            ingresos -
-            egresos -
-            (prestamos.recordset[0]?.total || 0) +
-            (pagosPrestamos.recordset[0]?.total || 0);
+            ingresosTotales -
+            egresosTotales -
+            totalPrestamos +
+            totalPagosPrestamos;
 
         res.render('finanzas', {
-            ingresos,
-            egresos,
+            ingresos: ingresosTotales,
+            egresos: egresosTotales,
             deuda,
             cajaTotal,
             movimientos: movimientos.recordset || [],
@@ -908,47 +912,9 @@ AND YEAR(fechaPa) = ${anio}
         });
 
     } catch (err) {
-
         console.log("❌ ERROR FINANZAS:", err);
         res.status(500).send("Error finanzas");
-
     }
-
-});
-// ===========================
-// ❌ ELIMINAR EGRESO
-// ===========================
-// ===========================
-// ❌ ELIMINAR EGRESO
-// ===========================
-app.post('/eliminar-egreso/:id', auth, async (req, res) => {
-
-    try {
-
-        const id = req.params.id;
-
-        // eliminar de egresos
-        await sql.query(`
-            DELETE FROM egresos
-            WHERE id = ${id}
-        `);
-
-        // eliminar también del historial financiero
-        await sql.query(`
-            DELETE FROM cajamovimientos
-            WHERE referencia = ${id}
-            AND tipo = 'egreso'
-        `);
-
-        res.redirect('/egresos');
-
-    } catch (err) {
-
-        console.log(err);
-        res.send('Error eliminando egreso');
-
-    }
-
 });
 app.post('/finanzas/movimiento', auth, async (req, res) => {
     try {
@@ -995,30 +961,26 @@ app.post('/finanzas/reset-caja', auth, async (req, res) => {
 });
 
 // ===============================
-// 🔄 REINICIAR FINANZAS
+// 🔄 REINICIAR FINANZAS COMPLETAS
 // ===============================
 app.post('/reiniciar-finanzas', auth, async (req, res) => {
-
     try {
 
-        // 🧾 borrar historial financiero
+        // borrar historial
         await sql.query(`
-            DELETE FROM cajamovimientos
+            DELETE FROM  CajaMovimientos
         `);
 
-        // 💸 borrar egresos
+        // reiniciar pagos
         await sql.query(`
-            DELETE FROM egresos
+            UPDATE pas
+            SET monto = 0
         `);
 
-        // 💰 reiniciar caja
+        // reiniciar caja
         await sql.query(`
-            DELETE FROM caja
-        `);
-
-        // 💰 REINICIAR PAGOS (ESTO TE FALTABA)
-        await sql.query(`
-            DELETE FROM pas
+            UPDATE caja
+            SET total = 0
         `);
 
         res.redirect('/finanzas');
@@ -1026,20 +988,35 @@ app.post('/reiniciar-finanzas', auth, async (req, res) => {
     } catch (err) {
 
         console.log(err);
-
-        res.send(`
-            <h2>Error reiniciando finanzas</h2>
-            <pre>${err}</pre>
-        `);
+        res.send('Error reiniciando finanzas');
 
     }
-
 });
 
 // ===========================
 // ❌ ELIMINAR MOVIMIENTO
 // ===========================
+app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
 
+    try {
+
+        const id = req.params.id;
+
+        await sql.query(`
+            DELETE FROM cajamovimientos
+            WHERE id = ${id}
+        `);
+
+        res.redirect('/finanzas');
+
+    } catch (err) {
+
+        console.log(err);
+        res.send('Error eliminando movimiento');
+
+    }
+
+});
 app.get('/deudores', auth, async (req, res) => {
     try {
 
@@ -1150,54 +1127,32 @@ app.post('/deudores/agregar', auth, async (req, res) => {
     }
 });
 app.get('/egresos', auth, async (req, res) => {
-
     try {
 
-        // 📅 mes seleccionado
-        const mesSeleccionado =
-            req.query.mes ||
-            new Date().toISOString().slice(0,7);
+        // 📅 mes seleccionado (formato: 2026-05)
+        const mesSeleccionado = req.query.mes || new Date().toISOString().slice(0,7);
 
-        // 🔍 obtener egresos
         const result = await sql.query`
-
-            SELECT
-                id,
-                concepto,
-                monto,
-                fecha
-
-            FROM egresos
-
+            SELECT concepto, monto, fecha
+            FROM Egresos
             WHERE FORMAT(fecha, 'yyyy-MM') = ${mesSeleccionado}
-
             ORDER BY fecha DESC
         `;
 
         const movimientos = result.recordset;
 
-        // 💰 total
-        const total = movimientos.reduce(
-            (acc, m) => acc + Number(m.monto),
-            0
-        );
+        const total = movimientos.reduce((acc, m) => acc + m.monto, 0);
 
-        // 📤 render
         res.render('egresos', {
-
             movimientos,
             total,
             mesSeleccionado
-
         });
 
     } catch (err) {
-
         console.log(err);
         res.send('Error egresos');
-
     }
-
 });
 app.post('/egresos/agregar', auth, async (req, res) => {
     try {
@@ -1223,32 +1178,23 @@ app.post('/egresos/agregar', auth, async (req, res) => {
 // ===========================
 // ❌ ELIMINAR MOVIMIENTO
 // ===========================
-// ===========================
-// ❌ ELIMINAR MOVIMIENTO
-// ===========================
-app.post('/eliminar-egreso/:id', auth, async (req, res) => {
+app.post('/eliminar-movimiento/:id', auth, async (req, res) => {
 
     try {
 
         const id = req.params.id;
 
         await sql.query(`
-            DELETE FROM egresos
+            DELETE FROM cajamovimientos
             WHERE id = ${id}
         `);
 
-        await sql.query(`
-            DELETE FROM cajamovimientos
-            WHERE referencia = ${id}
-            AND tipo = 'egreso'
-        `);
-
-        res.redirect('/egresos');
+        res.redirect('/finanzas');
 
     } catch (err) {
 
         console.log(err);
-        res.send('Error eliminando egreso');
+        res.send('Error eliminando movimiento');
 
     }
 
