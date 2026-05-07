@@ -852,12 +852,13 @@ app.get('/finanzas', auth, async (req, res) => {
         `;
 
         // ➖ EGRESOS
-        const egresosResult = await sql.query`
-            SELECT ISNULL(SUM(monto), 0) as total
-            FROM Egresos
-            WHERE MONTH(fecha) = ${mes}
-            AND YEAR(fecha) = ${anio}
-        `;
+        // ➖ EGRESOS (USANDO TU ESTRUCTURA REAL)
+const egresosResult = await sql.query`
+    SELECT ISNULL(SUM(monto), 0) as total
+    FROM Egresos
+    WHERE mes = ${mes}
+    AND anio = ${anio}
+`;
 
         const egresos = egresosResult.recordset?.[0]?.total || 0;
 
